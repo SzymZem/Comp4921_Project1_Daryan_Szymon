@@ -1,0 +1,18 @@
+{
+	"name": "tutorial",
+	"version": "1.0.0",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"dependencies": {
+		"bcrypt": "^6.0.0",
+		"bcryptjs": "^3.0.3",
+		"dotenv": "^16.4.5",
+		"ejs": "^3.1.9",
+		"express": "^4.18.3",
+		"mysql2": "^3.9.2",
+		"sequelize": "^6.37.8"
+	},
+	"author": "Patrick",
+	"license": "ISC"
+}
