@@ -55,7 +55,7 @@ app.use(session({
     cookie: {
         maxAge: expireTime,
         sameSite: 'lax',
-        secure: false // TODO: make this true when using https (temporarily false while testing in localhost)
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
 
@@ -561,9 +561,13 @@ app.get("*", (req, res) => {
     res.render("404");
 })
 
-app.listen(port, () => {
-    console.log("Node application listening on port " + port);
-});
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log("Node application listening on port " + port);
+    });
+}
+
+module.exports = app;
 
 
 
