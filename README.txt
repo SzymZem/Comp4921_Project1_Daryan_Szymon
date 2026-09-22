@@ -1,0 +1,1 @@
+note to self: if aiven stuff isnt working, go to aiven dashboard and "power on"

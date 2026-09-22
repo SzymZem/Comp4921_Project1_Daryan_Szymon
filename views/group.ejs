@@ -1,0 +1,258 @@
+<%- include("templates/header") %>
+
+    <a href="/members">
+        <input type="button" value="← Back" />
+    </a>
+
+
+    <h2 style="display:flex; align-items:center; gap:10px;">
+        <b>
+            <%= group.name %>
+        </b>
+
+        <form action="/group/<%= group.room_id %>/edit" method="get" style="display:inline;">
+            <button type="submit">Edit</button>
+        </form>
+    </h2>
+
+    <hr>
+
+    <div id="messages" style="height:50vh; overflow-y:auto;"></div>
+    <hr>
+
+    <form action="/group/<%= group.room_id %>/send" method="post">
+        <input name="message" type="text" placeholder="Type a message..." style="width:300px;" required>
+        <button>Send</button>
+    </form>
+
+
+    <script>
+        const roomId = "<%= group.room_id %>";
+        const messagesDiv = document.getElementById("messages");
+
+        let lastReadClient = null;
+
+        async function markAsRead(messageId) {
+            if (lastReadClient !== null && messageId <= lastReadClient) {
+                return;
+            }
+
+            try {
+                await fetch(`/group/${roomId}/read`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `messageId=${messageId}`
+                });
+
+                lastReadClient = messageId;
+            }
+            catch (err) {
+                console.log("failed to mark as read");
+            }
+        }
+
+        function renderMessages(messages, lastRead) {
+            lastReadClient = lastRead; const wasNearBottom =
+                messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight < 50;
+
+            messagesDiv.innerHTML = "";
+
+            let unreadInserted = false;
+
+            for (const msg of messages) {
+
+                if (!unreadInserted && msg.message_id > (lastRead ?? 0)) {
+                    const divider = document.createElement("div");
+                    divider.textContent = "Unread Messages";
+                    divider.style.color = "red";
+                    divider.style.borderTop = "2px solid red";
+                    divider.style.margin = "10px 0";
+                    divider.style.paddingTop = "5px";
+                    divider.style.fontWeight = "bold";
+
+                    messagesDiv.appendChild(divider);
+
+                    unreadInserted = true;
+                }
+
+
+                const container = document.createElement("div");
+                container.style.marginBottom = "15px";
+                container.style.position = "relative";
+
+                const header = document.createElement("div");
+
+                const username = document.createElement("b");
+                username.textContent = msg.username;
+
+                const time = document.createElement("span");
+                time.style.color = "gray";
+                time.style.fontSize = "12px";
+                time.style.marginLeft = "8px";
+                time.textContent = new Date(msg.sent_datetime).toLocaleString();
+                header.appendChild(username);
+                header.appendChild(time);
+
+                const text = document.createElement("div");
+                text.textContent = msg.text;
+
+                container.onmousemove = () => {
+                    markAsRead(msg.message_id);
+                };
+
+                // reaction button
+                const reactBtn = document.createElement("button");
+                reactBtn.textContent = "+";
+                reactBtn.style.marginLeft = "10px";
+                reactBtn.style.opacity = "0";
+                reactBtn.style.pointerEvents = "none";
+
+                container.onmouseenter = () => {
+                    reactBtn.style.opacity = "1";
+                    reactBtn.style.pointerEvents = "auto";
+                };
+
+                container.onmouseleave = () => {
+                    reactBtn.style.opacity = "0";
+                    reactBtn.style.pointerEvents = "none";
+                };
+
+                // dropdown
+                const dropdown = document.createElement("div");
+                dropdown.style.position = "absolute";
+                dropdown.style.left = "100%";
+                dropdown.style.top = "0";
+                dropdown.style.marginLeft = "5px";
+                dropdown.style.background = "white";
+                dropdown.style.border = "1px solid black";
+                dropdown.style.padding = "5px";
+                dropdown.style.display = "none";
+                dropdown.style.zIndex = "10";
+                dropdown.style.display = "none";
+                dropdown.style.flexDirection = "row";
+                dropdown.style.gap = "5px";
+
+
+                // emojis from backend NTS
+                const emojis = <%- JSON.stringify(emojis) %>; // NTS: if messages arent loading, its because auto-format added a space so remove it in "% -" lol change it to "%-"
+
+                for (const emoji of emojis) {
+                    const btn = document.createElement("button");
+                    btn.style.padding = "4px";
+                    btn.style.display = "flex";
+                    btn.style.alignItems = "center";
+                    btn.style.justifyContent = "center";
+
+                    const img = document.createElement("img");
+                    img.src = `/emojis/${emoji.image}`;
+                    img.alt = emoji.name;
+                    img.style.width = "20px";
+                    img.style.height = "20px";
+
+                    btn.appendChild(img);
+
+                    btn.onclick = async () => {
+                        await fetch(`/message/${msg.message_id}/react`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: `emojiId=${emoji.emoji_id}`
+                        });
+
+                        fetchMessages();
+                    };
+
+                    dropdown.appendChild(btn);
+                }
+
+                reactBtn.onclick = () => {
+                    dropdown.style.display = dropdown.style.display === "none" ? "flex" : "none";
+                };
+
+                const btnWrapper = document.createElement("span");
+                btnWrapper.style.position = "relative";
+
+                btnWrapper.appendChild(reactBtn);
+                btnWrapper.appendChild(dropdown);
+
+                header.appendChild(btnWrapper);
+
+                const reactionsDiv = document.createElement("div");
+
+                if (msg.reactions) {
+                    for (const r of msg.reactions) {
+                        const btn = document.createElement("button");
+                        const img = document.createElement("img");
+                        img.src = `/emojis/${r.image}`;
+                        img.alt = r.name;
+                        img.style.width = "16px";
+                        img.style.height = "16px";
+                        img.style.verticalAlign = "middle";
+                        img.style.marginRight = "4px";
+
+                        const countSpan = document.createElement("span");
+                        countSpan.textContent = r.count;
+
+                        btn.appendChild(img);
+                        btn.appendChild(countSpan);
+                        btn.style.marginRight = "6px";
+                        btn.style.borderRadius = "10px";
+                        btn.style.padding = "2px 6px";
+
+                        if (r.reacted) {
+                            btn.style.background = "#3c58fa44"; // current user reacted
+                        }
+                        else {
+                            btn.style.background = "#eee"; // others reacted
+                        }
+
+                        btn.onclick = async () => {
+                            if (r.reacted) {
+                                await fetch(`/message/${msg.message_id}/unreact`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                    body: `emojiId=${r.emoji_id}`
+                                });
+                            }
+                            else {
+                                await fetch(`/message/${msg.message_id}/react`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                    body: `emojiId=${r.emoji_id}`
+                                });
+                            }
+
+                            fetchMessages();
+                        };
+
+                        reactionsDiv.appendChild(btn);
+                    }
+                }
+
+                container.appendChild(header);
+                container.appendChild(text);
+                container.appendChild(reactionsDiv);
+
+                messagesDiv.appendChild(container);
+            }
+
+            if (wasNearBottom || messages.length <= 1) {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        async function fetchMessages() {
+            try {
+                const res = await fetch(`/group/${roomId}/messages`);
+                const data = await res.json();
+
+                renderMessages(data.messages, data.lastRead);
+            }
+            catch (err) {
+                console.log("failed to fetch messages");
+            }
+        }
+
+        fetchMessages();
+        setInterval(fetchMessages, 2000);
+    </script>
+    <%- include("templates/footer") %>

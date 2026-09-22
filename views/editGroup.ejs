@@ -1,0 +1,26 @@
+<%- include("templates/header") %>
+
+    <h2>Edit Group</h2>
+
+    <form action="/group/<%= group.room_id %>/edit" method="post">
+
+        <label>Group Name</label><br>
+        <input name="groupName" type="text" value="<%= group.name %>" required>
+        <br><br>
+
+        <h3>Members</h3>
+
+        <% users.forEach(user=> { %>
+            <div>
+                <input type="checkbox" name="userIds" value="<%= user.user_id %>" <%=members.some(m=> m.user_id ===
+                user.user_id) ? "checked" : "" %>
+                >
+                <%= user.username %>
+            </div>
+            <% }) %>
+
+                <br>
+                <button>Save</button>
+    </form>
+
+    <%- include("templates/footer") %>

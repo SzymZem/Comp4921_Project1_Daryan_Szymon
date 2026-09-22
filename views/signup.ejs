@@ -1,0 +1,18 @@
+<%- include("templates/header") %>
+    create user
+
+    <form action='/submitUser' method='post'>
+        <input name='username' type='text' placeholder='username' value="<%= username ?? '' %>">
+        <br>
+        <input name='password' type='password' placeholder='password'
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{10,}$"
+            title="At least 10 characters, including uppercase, lowercase, number, and symbol" required> <br>
+        <button>Submit</button>
+    </form>
+
+    <% if (typeof error !=="undefined" ) { %>
+        <p style="color:red;">
+            <%= error %>
+        </p>
+        <% } %>
+            <%- include("templates/footer") %>

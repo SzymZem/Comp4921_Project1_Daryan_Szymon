@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>3920 Chat Messaging</title>
+</head>
+
+<body>
+
+    <div
+        style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid black; padding:10px;">
+
+        <div>
+            <form action="/" method="get" style="display:inline;">
+                <button type="submit">Home</button>
+            </form>
+        </div>
+        <div>
+            <% if (loggedIn) { %>
+
+                <span style="margin-right:10px;"><b>
+                        <%= username %>
+                    </b></span>
+
+                <form action="/logout" method="get" style="display:inline;">
+                    <button type="submit">Sign Out</button>
+                </form>
+
+                <% } else { %>
+
+                    <form action="/login" method="get" style="display:inline;">
+                        <button type="submit">Login</button>
+                    </form>
+
+                    <form action="/signup" method="get" style="display:inline;">
+                        <button type="submit">Sign Up</button>
+                    </form>
+
+                    <% } %>
+        </div>
+
+    </div>

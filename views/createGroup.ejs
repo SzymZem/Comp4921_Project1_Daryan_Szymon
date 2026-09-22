@@ -1,0 +1,47 @@
+<%- include("templates/header") %>
+
+    <h1>Create Group Chat</h1>
+
+    <form action="/createGroup" method="post">
+
+        <input name="groupName" type="text" placeholder="Group Name" required>
+        <br><br>
+
+        <h3>Select Users</h3>
+
+        <input type="text" id="userSearch" placeholder="Search users...">
+
+        <div id="userList" style="max-height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+            <% users.forEach(user=> { %>
+                <div class="user-item">
+                    <input type="checkbox" name="userIds" value="<%= user.user_id %>">
+                    <span class="username">
+                        <%= user.username %>
+                    </span>
+                </div>
+                <% }) %>
+        </div>
+
+        <script>
+            document.getElementById("userSearch").addEventListener("input", function () {
+                const search = this.value.toLowerCase();
+                const users = document.querySelectorAll("#userList .user-item");
+
+                users.forEach(function (user) {
+                    const name = user.querySelector(".username").textContent.toLowerCase();
+
+                    if (name.includes(search)) {
+                        user.style.display = "";
+                    }
+                    else {
+                        user.style.display = "none";
+                    }
+                });
+            });
+        </script>
+
+        <br>
+        <button>Create</button>
+    </form>
+
+    <%- include("templates/footer") %>

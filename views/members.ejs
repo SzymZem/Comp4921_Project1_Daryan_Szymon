@@ -1,0 +1,63 @@
+<%- include("templates/header") %>
+    <% if (loggedIn) { %>
+
+        <h1>Hello, <%= username %>
+        </h1>
+        <a href="/logout">
+            <input type="button" value="Sign Out" />
+        </a>
+
+        <hr>
+
+        <h2>
+            Group Chats
+            <span style="font-weight:normal; color:gray;">
+                (<%= groups ? groups.length : 0 %>)
+            </span>
+        </h2>
+
+        <a href="/createGroup">
+            <button>+</button>
+        </a>
+        <div>
+            <% if (groups && groups.length> 0) { %>
+                <% groups.forEach(group=> { %>
+                    <form action="/group/<%= group.room_id %>" method="get" style="display:inline;">
+                        <button type="submit" style="display:flex; justify-content:space-between; width:300px;">
+
+                            <span>
+                                <%= group.name %>
+                            </span>
+
+                            <span style="text-align:right; font-size:12px;">
+
+                                <% if (group.unread_count> 0) { %>
+                                    <span style="color:red; margin-right:8px;">
+                                        <%= group.unread_count %>
+                                    </span>
+                                    <% } %>
+
+                                        <% if (group.last_message_time) { %>
+                                            <span style="color:gray;">
+                                                <%= new Date(group.last_message_time).toLocaleDateString() %>
+                                            </span>
+                                            <% } %>
+
+                            </span>
+
+                        </button>
+                    </form>
+                    <% }) %>
+                        <% } else { %>
+                            <p>No group chats yet</p>
+                            <% } %>
+        </div>
+
+        <br>
+
+
+
+        <% } else { %>
+            <img src="https://media1.tenor.com/m/mVZ8kHeWAdgAAAAd/are-you-still-there-hello.gif">
+            <% } %>
+                <%- include("templates/footer") %>
