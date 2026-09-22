@@ -1,70 +1,64 @@
 <%- include("templates/header") %>
     <% if (loggedIn) { %>
-        <style>
-            table,
-            td,
-            td {
-                border: 1px solid;
-                padding: 0.25em;
-            }
 
-            table {
-                border-collapse: collapse;
-            }
-        </style>
-        <h1>Hello, <%= username %>
-        </h1>
+
+
+        <div class="content">
+            <h1 class="header">Hello, <%= username %>
+            </h1>
 
 
 
 
-        <div>
-            <button>Links</button>
-            <button>Images</button>
-            <button>Text</button>
+            <div>
+                <button class="button">Links</button>
+                <button class="button">Images</button>
+                <button class="button">Text</button>
+
+            </div>
+
+            <br>
+
+            <table class="table">
+                <tr>
+                    <th>ID</th>
+                    <th>URL</th>
+                    <th>Short URL</th>
+                    <th>Hits</th>
+                    <th>Active</th>
+                    <th>Created</th>
+                    <th>Last Hit</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>https://youtube.com</td>
+                    <td>https://4921.szymo.net/you</td>
+                    <td>14</td>
+                    <td><input type="checkbox" checked></td>
+                    <td>Sep 21, 2026</td>
+                    <td>Sep 22, 2026</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>https://gmail.com</td>
+                    <td>https://4921.szymo.net/g</td>
+                    <td>2</td>
+                    <td><input type="checkbox"></td>
+                    <td>Sep 4, 2026</td>
+                    <td>Sep 6, 2026</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>https://google.com</td>
+                    <td>https://4921.szymo.net/goog</td>
+                    <td>243</td>
+                    <td><input type="checkbox" checked></td>
+                    <td>Sep 18, 2026</td>
+                    <td>Sep 20, 2026</td>
+                </tr>
+            </table>
 
         </div>
-
-        <br>
-
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>URL</th>
-                <th>Short URL</th>
-                <th>Hits</th>
-                <th>Active</th>
-                <th>Created</th>
-                <th>Last Hit</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>https://youtube.com</td>
-                <td>https://1.szymo.net/you</td>
-                <td>14</td>
-                <td><input type="checkbox" checked></td>
-                <td>Sep 21, 2026</td>
-                <td>Sep 22, 2026</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>https://gmail.com</td>
-                <td>https://1.szymo.net/g</td>
-                <td>2</td>
-                <td><input type="checkbox"></td>
-                <td>Sep 4, 2026</td>
-                <td>Sep 6, 2026</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>https://google.com</td>
-                <td>https://1.szymo.net/goog</td>
-                <td>243</td>
-                <td><input type="checkbox" checked></td>
-                <td>Sep 18, 2026</td>
-                <td>Sep 20, 2026</td>
-            </tr>
-        </table>
 
 
 

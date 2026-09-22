@@ -6,34 +6,34 @@
 </head>
 
 <body>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     <div
         style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid black; padding:10px;">
 
         <div>
             <form action="/" method="get" style="display:inline;">
-                <button type="submit">Home</button>
+                <button class="button" type="submit">Home</button>
             </form>
         </div>
-        <div>
+        <div class="is-vcentered has-text-centered">
             <% if (loggedIn) { %>
 
-                <span style="margin-right:10px;"><b>
+                <!-- <span style="vertical-align: middle;"><b>
                         <%= username %>
-                    </b></span>
+                    </b></span> -->
 
                 <form action="/logout" method="get" style="display:inline;">
-                    <button type="submit">Sign Out</button>
+                    <button class="button" type="submit">Sign Out</button>
                 </form>
 
                 <% } else { %>
 
                     <form action="/login" method="get" style="display:inline;">
-                        <button type="submit">Login</button>
+                        <button class="button" type="submit">Login</button>
                     </form>
 
                     <form action="/signup" method="get" style="display:inline;">
-                        <button type="submit">Sign Up</button>
+                        <button class="button" type="submit">Sign Up</button>
                     </form>
 
                     <% } %>
