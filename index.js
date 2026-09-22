@@ -8,9 +8,9 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12;
 
 
-const database = include('databaseConnection');
-const db_utils = include('database/db_utils');
-const db_users = include('database/users');
+const database = require('./databaseConnection');
+const db_utils = require('./database/db_utils');
+const db_users = require('./database/users');
 const success = db_utils.printMySQLVersion();
 
 const port = process.env.PORT || 3000;
@@ -96,7 +96,7 @@ app.post('/submitEmail', (req, res) => {
 
 app.get('/createTables', async (req, res) => {
 
-    const create_tables = include('database/create_tables');
+    const create_tables = require('./database/create_tables');
 
     let success = await create_tables.createTables();
     if (success) {
