@@ -21,6 +21,9 @@ Project Requirements (https://learn.bcit.ca/d2l/le/dropbox/1233774/694229/Downlo
 - Ability to enable and disable links. Disabled links will display a message such as content not available.
 
 
+# Possible extras to add (after MVP)
+- Chat messaging system between users
+
 # Aiven broken?
 Go to aiven dashboard and "power on"
 Aiven email: `szymondump0@gmail.com`
