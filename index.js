@@ -5,6 +5,7 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
 const saltRounds = 12;
 
 
@@ -12,6 +13,7 @@ const database = require('./databaseConnection');
 const db_utils = require('./database/db_utils');
 const db_users = require('./database/users');
 const db_content = require('./database/content');
+const { uploadImage, deleteImage, imageUrl } = require('./cloudinaryConnection');
 const success = db_utils.printMySQLVersion();
 
 const port = process.env.PORT || 3000;
@@ -114,18 +116,25 @@ app.get('/signup', (req, res) => {
     });
 });
 
-async function renderMembers(req, res, error, form) {
+function contentTypeOrDefault(type) {
+    return db_content.CONTENT_TYPES.includes(type) ? type : 'link';
+}
+
+async function renderMembers(req, res, type, error, form) {
     const groups = await db_users.getUserGroups(req.session.user_id);
-    const links = await db_content.getUserContent(req.session.user_id);
+    const contents = await db_content.getUserContent(req.session.user_id, type);
 
     res.render('members', {
         loggedIn: true,
         username: req.session.username,
         groups: groups,
-        links: links,
+        type: type,
+        contents: contents,
+        imageUrl: imageUrl,
+        maxTextLength: db_content.MAX_TEXT_LENGTH,
         baseUrl: req.protocol + '://' + req.get('host'),
         error: error || null,
-        form: form || { url: "", customCode: "" }
+        form: form || { url: "", text: "", customCode: "" }
     });
 }
 
@@ -136,7 +145,7 @@ app.get('/members', async (req, res) => {
         return
     }
 
-    await renderMembers(req, res);
+    await renderMembers(req, res, contentTypeOrDefault(req.query.type));
 });
 
 
@@ -339,53 +348,108 @@ app.get('/api', (req, res) => {
 
 });
 
-app.use('/links', sessionValidation);
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-app.post('/links/create', async (req, res) => {
-    const form = {
-        url: (req.body.url || "").trim(),
-        customCode: (req.body.customCode || "").trim()
-    };
-
-    const url = db_content.normalizeUrl(form.url);
-    if (!url) {
-        res.status(400);
-        await renderMembers(req, res, "Please enter a valid http(s) URL.", form);
-        return;
-    }
-
-    if (form.customCode && !db_content.isValidCustomCode(form.customCode)) {
-        res.status(400);
-        await renderMembers(req, res, "Custom short URL must be 3-32 letters, numbers, - or _ and not a reserved word.", form);
-        return;
-    }
-
-    const result = await db_content.createLink(req.session.user_id, url, form.customCode);
-    if (!result.success) {
-        res.status(400);
-        await renderMembers(req, res, result.error, form);
-        return;
-    }
-
-    res.redirect('/members');
+// Images are kept in memory only long enough to stream them to Cloudinary.
+// Non-image files are skipped, which leaves req.file undefined.
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: MAX_IMAGE_BYTES },
+    fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith('image/'))
 });
 
-app.post('/links/:id/toggle', async (req, res) => {
+app.use('/content', sessionValidation);
+
+app.post('/content/create', (req, res) => {
+    // multer ignores the urlencoded link/text forms, so one route handles all three types
+    upload.single('image')(req, res, async (uploadErr) => {
+        const type = uploadErr ? 'image' : contentTypeOrDefault(req.body.type);
+        const form = {
+            url: (req.body.url || "").trim(),
+            text: req.body.text || "",
+            customCode: (req.body.customCode || "").trim()
+        };
+
+        const fail = async (message) => {
+            res.status(400);
+            await renderMembers(req, res, type, message, form);
+        };
+
+        if (uploadErr) {
+            await fail(uploadErr.code === 'LIMIT_FILE_SIZE' ? "Images must be 5 MB or smaller." : "Failed to upload image.");
+            return;
+        }
+
+        if (form.customCode && !db_content.isValidCustomCode(form.customCode)) {
+            await fail("Custom short URL must be 3-32 letters, numbers, - or _ and not a reserved word.");
+            return;
+        }
+
+        let data;
+        if (type === 'link') {
+            data = db_content.normalizeUrl(form.url);
+            if (!data) {
+                await fail("Please enter a valid http(s) URL.");
+                return;
+            }
+        }
+        else if (type === 'text') {
+            if (!db_content.isValidText(form.text)) {
+                await fail(`Text must be between 1 and ${db_content.MAX_TEXT_LENGTH} characters.`);
+                return;
+            }
+            data = form.text;
+        }
+        else {
+            if (!req.file) {
+                await fail("Please choose an image file.");
+                return;
+            }
+            try {
+                data = await uploadImage(req.file.buffer);
+            }
+            catch (err) {
+                console.log("Error uploading image to Cloudinary");
+                console.log(err);
+                await fail("Failed to upload image.");
+                return;
+            }
+        }
+
+        const result = await db_content.createContent(req.session.user_id, type, data, form.customCode);
+        if (!result.success) {
+            if (type === 'image') {
+                await deleteImage(data); // don't leave an orphaned file on Cloudinary
+            }
+            await fail(result.error);
+            return;
+        }
+
+        res.redirect('/members?type=' + type);
+    });
+});
+
+app.post('/content/:id/toggle', async (req, res) => {
     const updated = await db_content.toggleActive(req.params.id, req.session.user_id);
     if (!updated) {
-        res.status(400).render("errorMessage", { error: "You can only edit your own links." });
+        res.status(400).render("errorMessage", { error: "You can only edit your own content." });
         return;
     }
-    res.redirect('/members');
+    res.redirect('/members?type=' + contentTypeOrDefault(req.body.type));
 });
 
-app.post('/links/:id/delete', async (req, res) => {
-    const deleted = await db_content.deleteContent(req.params.id, req.session.user_id);
+app.post('/content/:id/delete', async (req, res) => {
+    const content = await db_content.getContent(req.params.id);
+    const deleted = content && await db_content.deleteContent(req.params.id, req.session.user_id);
     if (!deleted) {
-        res.status(400).render("errorMessage", { error: "You can only delete your own links." });
+        res.status(400).render("errorMessage", { error: "You can only delete your own content." });
         return;
     }
-    res.redirect('/members');
+
+    if (content.content_type === 'image') {
+        await deleteImage(content.data);
+    }
+    res.redirect('/members?type=' + content.content_type);
 });
 
 app.get('/createGroup', async (req, res) => {
@@ -632,10 +696,13 @@ app.get('/:code', async (req, res, next) => {
     if (content.content_type === 'link') {
         // 302 (not 301) so browsers don't cache the redirect and skip our hit counter
         res.redirect(302, content.data);
-        return;
     }
-
-    next();
+    else if (content.content_type === 'text') {
+        res.render("showText", { content: content });
+    }
+    else {
+        res.render("showImage", { content: content, imageUrl: imageUrl(content.data) });
+    }
 });
 
 app.get("*", (req, res) => {

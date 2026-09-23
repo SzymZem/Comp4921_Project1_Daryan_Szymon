@@ -10,23 +10,41 @@
 
 
 
-            <div>
-                <button class="button">Links</button>
-                <button class="button">Images</button>
-                <button class="button">Text</button>
-
+            <div class="tabs">
+                <ul>
+                    <li class="<%= type === 'link' ? 'is-active' : '' %>"><a href="/members?type=link">Links</a></li>
+                    <li class="<%= type === 'image' ? 'is-active' : '' %>"><a href="/members?type=image">Images</a></li>
+                    <li class="<%= type === 'text' ? 'is-active' : '' %>"><a href="/members?type=text">Text</a></li>
+                </ul>
             </div>
 
-            <br>
+            <form class="box" action="/content/create" method="post"
+                <% if (type === 'image') { %>enctype="multipart/form-data"<% } %>>
+                <input type="hidden" name="type" value="<%= type %>">
 
-            <form class="box" action="/links/create" method="post">
-                <div class="field">
-                    <label class="label">URL to shorten</label>
-                    <div class="control">
-                        <input class="input" type="text" name="url" placeholder="https://example.com"
-                            value="<%= form.url %>" required>
+                <% if (type === 'link') { %>
+                    <div class="field">
+                        <label class="label">URL to shorten</label>
+                        <div class="control">
+                            <input class="input" type="text" name="url" placeholder="https://example.com"
+                                value="<%= form.url %>" required>
+                        </div>
                     </div>
-                </div>
+                <% } else if (type === 'text') { %>
+                    <div class="field">
+                        <label class="label">Text to share</label>
+                        <div class="control">
+                            <textarea class="textarea" name="text" maxlength="<%= maxTextLength %>" required><%= form.text %></textarea>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="field">
+                        <label class="label">Image to share (max 5 MB)</label>
+                        <div class="control">
+                            <input class="input" type="file" name="image" accept="image/*" required>
+                        </div>
+                    </div>
+                <% } %>
 
                 <div class="field">
                     <label class="label">Custom short URL (optional)</label>
@@ -46,16 +64,16 @@
                     <div class="notification is-danger is-light"><%= error %></div>
                 <% } %>
 
-                <button class="button is-primary" type="submit">Shorten</button>
+                <button class="button is-primary" type="submit">Create short URL</button>
             </form>
 
-            <% if (links.length === 0) { %>
-                <p>You haven't created any links yet.</p>
+            <% if (contents.length === 0) { %>
+                <p>You haven't created any <%= type === 'link' ? 'links' : type === 'image' ? 'images' : 'text' %> yet.</p>
             <% } else { %>
                 <table class="table is-fullwidth is-hoverable">
                     <tr>
                         <th>Short URL</th>
-                        <th>URL</th>
+                        <th><%= type === 'link' ? 'URL' : type === 'image' ? 'Image' : 'Text' %></th>
                         <th>Hits</th>
                         <th>Active</th>
                         <th>Created</th>
@@ -63,24 +81,33 @@
                         <th></th>
                     </tr>
                     <% const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; %>
-                    <% links.forEach(link => { %>
+                    <% contents.forEach(item => { %>
                         <tr>
-                            <td><a href="/<%= link.content_id %>" target="_blank"><%= baseUrl %>/<%= link.content_id %></a></td>
-                            <td><a href="<%= link.data %>" target="_blank" rel="noopener noreferrer"><%= link.data %></a></td>
-                            <td><%= link.hits %></td>
+                            <td><a href="/<%= item.content_id %>" target="_blank"><%= baseUrl %>/<%= item.content_id %></a></td>
                             <td>
-                                <form action="/links/<%= link.content_id %>/toggle" method="post">
-                                    <button class="button is-small <%= link.active ? 'is-success' : 'is-light' %>" type="submit"
-                                        title="Click to <%= link.active ? 'disable' : 'enable' %>">
-                                        <%= link.active ? 'Active' : 'Disabled' %>
+                                <% if (type === 'link') { %>
+                                    <a href="<%= item.data %>" target="_blank" rel="noopener noreferrer"><%= item.data %></a>
+                                <% } else if (type === 'image') { %>
+                                    <img src="<%= imageUrl(item.data, { width: 120, height: 80, crop: 'fill' }) %>" alt="thumbnail">
+                                <% } else { %>
+                                    <%= item.data.length > 80 ? item.data.slice(0, 80) + '...' : item.data %>
+                                <% } %>
+                            </td>
+                            <td><%= item.hits %></td>
+                            <td>
+                                <form action="/content/<%= item.content_id %>/toggle" method="post">
+                                    <input type="hidden" name="type" value="<%= type %>">
+                                    <button class="button is-small <%= item.active ? 'is-success' : 'is-light' %>" type="submit"
+                                        title="Click to <%= item.active ? 'disable' : 'enable' %>">
+                                        <%= item.active ? 'Active' : 'Disabled' %>
                                     </button>
                                 </form>
                             </td>
-                            <td><%= formatDate(link.created_datetime) %></td>
-                            <td><%= formatDate(link.last_hit_datetime) %></td>
+                            <td><%= formatDate(item.created_datetime) %></td>
+                            <td><%= formatDate(item.last_hit_datetime) %></td>
                             <td>
-                                <form action="/links/<%= link.content_id %>/delete" method="post"
-                                    onsubmit="return confirm('Delete this link?');">
+                                <form action="/content/<%= item.content_id %>/delete" method="post"
+                                    onsubmit="return confirm('Delete this?');">
                                     <button class="button is-small is-danger is-outlined" type="submit">Delete</button>
                                 </form>
                             </td>

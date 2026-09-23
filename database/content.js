@@ -5,13 +5,15 @@ const CODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234
 const CODE_LENGTH = 6;
 const MAX_GENERATE_ATTEMPTS = 5;
 const CUSTOM_CODE_REGEX = /^[A-Za-z0-9_-]{3,32}$/;
+const MAX_TEXT_LENGTH = 10000;
+const CONTENT_TYPES = ['link', 'text', 'image'];
 
 // Short codes live at the site root (e.g. /abc123), so they can't collide with
 // our own single-segment routes. Express routing is case-insensitive, so compare lowercase.
 const RESERVED_CODES = new Set([
 	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'login',
 	'submituser', 'loggingin', 'logout', 'loggedin', 'api', 'creategroup', 'group',
-	'message', 'links', 'emojis'
+	'message', 'links', 'content', 'emojis'
 ]);
 
 function isReservedCode(code) {
@@ -20,6 +22,10 @@ function isReservedCode(code) {
 
 function isValidCustomCode(code) {
 	return CUSTOM_CODE_REGEX.test(code) && !isReservedCode(code);
+}
+
+function isValidText(text) {
+	return typeof text === 'string' && text.trim().length > 0 && text.length <= MAX_TEXT_LENGTH;
 }
 
 function generateCode() {
@@ -69,35 +75,35 @@ async function insertContent(contentId, userId, contentType, data) {
 	await database.query(insertSQL, [contentId, userId, contentType, data]);
 }
 
-async function createLink(userId, url, customCode) {
+async function createContent(userId, contentType, data, customCode) {
 	if (customCode) {
 		try {
-			await insertContent(customCode, userId, 'link', url);
+			await insertContent(customCode, userId, contentType, data);
 			return { success: true, contentId: customCode };
 		}
 		catch (err) {
 			if (err.code === 'ER_DUP_ENTRY') {
 				return { success: false, error: "That short URL is already taken." };
 			}
-			console.log("Error creating link");
+			console.log("Error creating content");
 			console.log(err);
-			return { success: false, error: "Failed to create link." };
+			return { success: false, error: "Failed to create content." };
 		}
 	}
 
 	for (let attempt = 0; attempt < MAX_GENERATE_ATTEMPTS; attempt++) {
 		const code = generateCode();
 		try {
-			await insertContent(code, userId, 'link', url);
+			await insertContent(code, userId, contentType, data);
 			return { success: true, contentId: code };
 		}
 		catch (err) {
 			if (err.code === 'ER_DUP_ENTRY') {
 				continue;
 			}
-			console.log("Error creating link");
+			console.log("Error creating content");
 			console.log(err);
-			return { success: false, error: "Failed to create link." };
+			return { success: false, error: "Failed to create content." };
 		}
 	}
 
@@ -122,16 +128,16 @@ async function getContent(contentId) {
 	}
 }
 
-async function getUserContent(userId) {
+async function getUserContent(userId, contentType) {
 	let getUserContentSQL = `
 		SELECT content_id, content_type, data, active, hits, created_datetime, last_hit_datetime
 		FROM content
-		WHERE user_id = ?
+		WHERE user_id = ? AND content_type = ?
 		ORDER BY created_datetime DESC;
 	`;
 
 	try {
-		const [rows] = await database.query(getUserContentSQL, [userId]);
+		const [rows] = await database.query(getUserContentSQL, [userId, contentType]);
 		return rows;
 	}
 	catch (err) {
@@ -195,9 +201,12 @@ async function deleteContent(contentId, userId) {
 }
 
 module.exports = {
+	CONTENT_TYPES,
+	MAX_TEXT_LENGTH,
 	isValidCustomCode,
+	isValidText,
 	normalizeUrl,
-	createLink,
+	createContent,
 	getContent,
 	getUserContent,
 	recordHit,
