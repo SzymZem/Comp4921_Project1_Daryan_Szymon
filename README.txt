@@ -25,6 +25,7 @@ Project Requirements (https://learn.bcit.ca/d2l/le/dropbox/1233774/694229/Downlo
 - Chat messaging system between users
 - Comments on posts
 - Editable links/text/images (instead of having to delete them, then add a new one
+- Longest URL leaderboard (disallowing fake long URLS with some URL longinators)
 
 # Aiven broken?
 Go to aiven dashboard and "power on"
