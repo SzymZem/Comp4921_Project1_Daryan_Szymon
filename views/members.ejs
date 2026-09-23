@@ -19,44 +19,75 @@
 
             <br>
 
-            <table class="table">
-                <tr>
-                    <th>ID</th>
-                    <th>URL</th>
-                    <th>Short URL</th>
-                    <th>Hits</th>
-                    <th>Active</th>
-                    <th>Created</th>
-                    <th>Last Hit</th>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>https://youtube.com</td>
-                    <td>https://4921.szymo.net/you</td>
-                    <td>14</td>
-                    <td><input type="checkbox" checked></td>
-                    <td>Sep 21, 2026</td>
-                    <td>Sep 22, 2026</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>https://gmail.com</td>
-                    <td>https://4921.szymo.net/g</td>
-                    <td>2</td>
-                    <td><input type="checkbox"></td>
-                    <td>Sep 4, 2026</td>
-                    <td>Sep 6, 2026</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>https://google.com</td>
-                    <td>https://4921.szymo.net/goog</td>
-                    <td>243</td>
-                    <td><input type="checkbox" checked></td>
-                    <td>Sep 18, 2026</td>
-                    <td>Sep 20, 2026</td>
-                </tr>
-            </table>
+            <form class="box" action="/links/create" method="post">
+                <div class="field">
+                    <label class="label">URL to shorten</label>
+                    <div class="control">
+                        <input class="input" type="text" name="url" placeholder="https://example.com"
+                            value="<%= form.url %>" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Custom short URL (optional)</label>
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static"><%= baseUrl %>/</span>
+                        </div>
+                        <div class="control is-expanded">
+                            <input class="input" type="text" name="customCode" placeholder="leave blank for random"
+                                value="<%= form.customCode %>" pattern="[A-Za-z0-9_\-]{3,32}">
+                        </div>
+                    </div>
+                    <p class="help">3-32 characters: letters, numbers, - and _</p>
+                </div>
+
+                <% if (error) { %>
+                    <div class="notification is-danger is-light"><%= error %></div>
+                <% } %>
+
+                <button class="button is-primary" type="submit">Shorten</button>
+            </form>
+
+            <% if (links.length === 0) { %>
+                <p>You haven't created any links yet.</p>
+            <% } else { %>
+                <table class="table is-fullwidth is-hoverable">
+                    <tr>
+                        <th>Short URL</th>
+                        <th>URL</th>
+                        <th>Hits</th>
+                        <th>Active</th>
+                        <th>Created</th>
+                        <th>Last Hit</th>
+                        <th></th>
+                    </tr>
+                    <% const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; %>
+                    <% links.forEach(link => { %>
+                        <tr>
+                            <td><a href="/<%= link.content_id %>" target="_blank"><%= baseUrl %>/<%= link.content_id %></a></td>
+                            <td><a href="<%= link.data %>" target="_blank" rel="noopener noreferrer"><%= link.data %></a></td>
+                            <td><%= link.hits %></td>
+                            <td>
+                                <form action="/links/<%= link.content_id %>/toggle" method="post">
+                                    <button class="button is-small <%= link.active ? 'is-success' : 'is-light' %>" type="submit"
+                                        title="Click to <%= link.active ? 'disable' : 'enable' %>">
+                                        <%= link.active ? 'Active' : 'Disabled' %>
+                                    </button>
+                                </form>
+                            </td>
+                            <td><%= formatDate(link.created_datetime) %></td>
+                            <td><%= formatDate(link.last_hit_datetime) %></td>
+                            <td>
+                                <form action="/links/<%= link.content_id %>/delete" method="post"
+                                    onsubmit="return confirm('Delete this link?');">
+                                    <button class="button is-small is-danger is-outlined" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </table>
+            <% } %>
 
         </div>
 

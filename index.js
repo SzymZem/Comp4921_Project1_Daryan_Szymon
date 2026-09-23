@@ -11,6 +11,7 @@ const saltRounds = 12;
 const database = require('./databaseConnection');
 const db_utils = require('./database/db_utils');
 const db_users = require('./database/users');
+const db_content = require('./database/content');
 const success = db_utils.printMySQLVersion();
 
 const port = process.env.PORT || 3000;
@@ -39,14 +40,6 @@ const mongoStore = MongoStore.create({
 
 
 
-
-app.use((req, res, next) => {
-    res.locals.loggedIn = req.session?.authenticated === true;
-    res.locals.username = req.session?.username || null;
-    next();
-});
-
-
 app.use(session({
     secret: node_session_secret,
     store: mongoStore,
@@ -58,6 +51,13 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production'
     }
 }));
+
+// must come after session() so req.session exists
+app.use((req, res, next) => {
+    res.locals.loggedIn = req.session?.authenticated === true;
+    res.locals.username = req.session?.username || null;
+    next();
+});
 
 
 app.get('/', (req, res) => {
@@ -114,6 +114,21 @@ app.get('/signup', (req, res) => {
     });
 });
 
+async function renderMembers(req, res, error, form) {
+    const groups = await db_users.getUserGroups(req.session.user_id);
+    const links = await db_content.getUserContent(req.session.user_id);
+
+    res.render('members', {
+        loggedIn: true,
+        username: req.session.username,
+        groups: groups,
+        links: links,
+        baseUrl: req.protocol + '://' + req.get('host'),
+        error: error || null,
+        form: form || { url: "", customCode: "" }
+    });
+}
+
 app.get('/members', async (req, res) => {
 
     if (!req.session.authenticated) {
@@ -121,14 +136,7 @@ app.get('/members', async (req, res) => {
         return
     }
 
-
-    const groups = await db_users.getUserGroups(req.session.user_id);
-
-    res.render('members', {
-        loggedIn: true,
-        username: req.session.username,
-        groups: groups
-    });
+    await renderMembers(req, res);
 });
 
 
@@ -329,6 +337,55 @@ app.get('/api', (req, res) => {
 
     res.json(jsonResponse);
 
+});
+
+app.use('/links', sessionValidation);
+
+app.post('/links/create', async (req, res) => {
+    const form = {
+        url: (req.body.url || "").trim(),
+        customCode: (req.body.customCode || "").trim()
+    };
+
+    const url = db_content.normalizeUrl(form.url);
+    if (!url) {
+        res.status(400);
+        await renderMembers(req, res, "Please enter a valid http(s) URL.", form);
+        return;
+    }
+
+    if (form.customCode && !db_content.isValidCustomCode(form.customCode)) {
+        res.status(400);
+        await renderMembers(req, res, "Custom short URL must be 3-32 letters, numbers, - or _ and not a reserved word.", form);
+        return;
+    }
+
+    const result = await db_content.createLink(req.session.user_id, url, form.customCode);
+    if (!result.success) {
+        res.status(400);
+        await renderMembers(req, res, result.error, form);
+        return;
+    }
+
+    res.redirect('/members');
+});
+
+app.post('/links/:id/toggle', async (req, res) => {
+    const updated = await db_content.toggleActive(req.params.id, req.session.user_id);
+    if (!updated) {
+        res.status(400).render("errorMessage", { error: "You can only edit your own links." });
+        return;
+    }
+    res.redirect('/members');
+});
+
+app.post('/links/:id/delete', async (req, res) => {
+    const deleted = await db_content.deleteContent(req.params.id, req.session.user_id);
+    if (!deleted) {
+        res.status(400).render("errorMessage", { error: "You can only delete your own links." });
+        return;
+    }
+    res.redirect('/members');
 });
 
 app.get('/createGroup', async (req, res) => {
@@ -555,6 +612,31 @@ app.post('/group/:id/read', async (req, res) => {
 });
 
 app.use(express.static(__dirname + "/public"));
+
+// Short links live at the root, so this must stay after every other route and
+// the static files. Viewing doesn't require login.
+app.get('/:code', async (req, res, next) => {
+    const content = await db_content.getContent(req.params.code);
+    if (!content) {
+        next(); // falls through to the 404 page
+        return;
+    }
+
+    if (!content.active) {
+        res.status(410).render("unavailable");
+        return;
+    }
+
+    await db_content.recordHit(content.content_id);
+
+    if (content.content_type === 'link') {
+        // 302 (not 301) so browsers don't cache the redirect and skip our hit counter
+        res.redirect(302, content.data);
+        return;
+    }
+
+    next();
+});
 
 app.get("*", (req, res) => {
     res.status(404);
