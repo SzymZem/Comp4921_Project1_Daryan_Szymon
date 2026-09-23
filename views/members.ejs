@@ -1,63 +1,68 @@
 <%- include("templates/header") %>
     <% if (loggedIn) { %>
 
-        <h1>Hello, <%= username %>
-        </h1>
-        <a href="/logout">
-            <input type="button" value="Sign Out" />
-        </a>
 
-        <hr>
 
-        <h2>
-            Group Chats
-            <span style="font-weight:normal; color:gray;">
-                (<%= groups ? groups.length : 0 %>)
-            </span>
-        </h2>
+        <div class="content">
+            <h1 class="header">Hello, <%= username %>
+            </h1>
 
-        <a href="/createGroup">
-            <button>+</button>
-        </a>
-        <div>
-            <% if (groups && groups.length> 0) { %>
-                <% groups.forEach(group=> { %>
-                    <form action="/group/<%= group.room_id %>" method="get" style="display:inline;">
-                        <button type="submit" style="display:flex; justify-content:space-between; width:300px;">
 
-                            <span>
-                                <%= group.name %>
-                            </span>
 
-                            <span style="text-align:right; font-size:12px;">
 
-                                <% if (group.unread_count> 0) { %>
-                                    <span style="color:red; margin-right:8px;">
-                                        <%= group.unread_count %>
-                                    </span>
-                                    <% } %>
+            <div>
+                <button class="button">Links</button>
+                <button class="button">Images</button>
+                <button class="button">Text</button>
 
-                                        <% if (group.last_message_time) { %>
-                                            <span style="color:gray;">
-                                                <%= new Date(group.last_message_time).toLocaleDateString() %>
-                                            </span>
-                                            <% } %>
+            </div>
 
-                            </span>
+            <br>
 
-                        </button>
-                    </form>
-                    <% }) %>
-                        <% } else { %>
-                            <p>No group chats yet</p>
-                            <% } %>
+            <table class="table">
+                <tr>
+                    <th>ID</th>
+                    <th>URL</th>
+                    <th>Short URL</th>
+                    <th>Hits</th>
+                    <th>Active</th>
+                    <th>Created</th>
+                    <th>Last Hit</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>https://youtube.com</td>
+                    <td>https://4921.szymo.net/you</td>
+                    <td>14</td>
+                    <td><input type="checkbox" checked></td>
+                    <td>Sep 21, 2026</td>
+                    <td>Sep 22, 2026</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>https://gmail.com</td>
+                    <td>https://4921.szymo.net/g</td>
+                    <td>2</td>
+                    <td><input type="checkbox"></td>
+                    <td>Sep 4, 2026</td>
+                    <td>Sep 6, 2026</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>https://google.com</td>
+                    <td>https://4921.szymo.net/goog</td>
+                    <td>243</td>
+                    <td><input type="checkbox" checked></td>
+                    <td>Sep 18, 2026</td>
+                    <td>Sep 20, 2026</td>
+                </tr>
+            </table>
+
         </div>
-
-        <br>
 
 
 
         <% } else { %>
-            <img src="https://media1.tenor.com/m/mVZ8kHeWAdgAAAAd/are-you-still-there-hello.gif">
+            <img src="https://media1.tenor.com/m/mVZ8kHeWAdgAAAAd/are-you-still-tdere-hello.gif">
             <% } %>
                 <%- include("templates/footer") %>

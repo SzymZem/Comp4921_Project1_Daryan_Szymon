@@ -1,5 +1,5 @@
 Project Requirements (https://learn.bcit.ca/d2l/le/dropbox/1233774/694229/DownloadAttachment?fid=48893250):
-- ~~Authentication (login with hashed passwords, password validation >= 10 characters with upper/lower, numbers, symbols)~~
+✅ Authentication (login with hashed passwords, password validation >= 10 characters with upper/lower, numbers, symbols)
 - Hosted on Render, Cyclic, etc
 - Must be logged in to create content.
 - Do not need to be logged in to view content.
@@ -20,6 +20,9 @@ Project Requirements (https://learn.bcit.ca/d2l/le/dropbox/1233774/694229/Downlo
 - Professional looking 404 page
 - Ability to enable and disable links. Disabled links will display a message such as content not available.
 
+
+# Possible extras to add (after MVP)
+- Chat messaging system between users
 
 # Aiven broken?
 Go to aiven dashboard and "power on"
