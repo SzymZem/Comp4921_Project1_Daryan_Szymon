@@ -1,7 +1,7 @@
 * {
     transition: opacity var(--ani-time), visibility var(--ani-time);
-    font-family: "BoxedRSB";
-    /* The default font for the entire page */
+    font-family: "Orbitron", sans-serif;
+    /* The default font for the entire page, loaded from Google Fonts in header.ejs */
     color: var(--text-color);
     fill: var(--text-color);
     margin: 0;
@@ -52,7 +52,7 @@ nav li {
 }
 
 nav a {
-    font-family: "Combine";
+    font-family: "combine-readable";
     height: 100%;
     padding: 0 2vw;
     display: flex;
@@ -236,12 +236,22 @@ a:not(:hover) {
     src: url('/combine/BoxedRoundSemibold.ttf');
 }
 
+
+@font-face {
+    font-family: "combine-readable";
+    src: url('/combine/fs-terran.otf');
+}
+
 .BoxedRSB {
     font-family: "BoxedRSB";
 }
 
 .combine-font {
     font-family: "Combine";
+}
+
+.combine-readable {
+    font-family: "combine-readable";
 }
 
 .combine-red {
@@ -321,7 +331,7 @@ textarea:hover {
     border: 2px solid #3ED2E1;
 }
 
-@media screen and (max-width: 1069px) {
+/* @media screen and (max-width: 1069px) {
     .mobile-only {
         display: block;
     }
@@ -334,7 +344,7 @@ textarea:hover {
         padding-top: calc(var(--nav-height) + 1vh);
         /* Clears the fixed navbar */
     }
-}
+} */
 
 h1 {
     color: var(--heading-color);
