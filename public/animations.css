@@ -35,6 +35,17 @@
     80%  { text-shadow: 0.08em 0 var(--text-color), -0.08em 0 var(--highlight-color); transform: none; }
 }
 
+/* same as glitch-text bnut for the svg */
+@keyframes glitch-svg {
+    0%   { filter: drop-shadow(0.08em 0 var(--text-color)) drop-shadow(-0.08em 0 var(--highlight-color)); transform: none; }
+    10%  { filter: drop-shadow(-0.15em 0 var(--text-color)) drop-shadow(0.12em 0 var(--highlight-color)); transform: translateX(0.05em); }
+    20%  { filter: drop-shadow(0.04em 0 var(--text-color)) drop-shadow(-0.04em 0 var(--highlight-color)); transform: none; }
+    45%  { filter: drop-shadow(0.2em 0.03em var(--text-color)) drop-shadow(-0.2em -0.03em var(--highlight-color)); transform: translateX(-0.08em) skewX(-8deg); }
+    50%  { filter: drop-shadow(0.06em 0 var(--text-color)) drop-shadow(-0.06em 0 var(--highlight-color)); transform: none; }
+    75%  { filter: drop-shadow(-0.1em 0 var(--text-color)) drop-shadow(0.1em 0 var(--highlight-color)); transform: translateY(-0.05em); }
+    80%  { filter: drop-shadow(0.08em 0 var(--text-color)) drop-shadow(-0.08em 0 var(--highlight-color)); transform: none; }
+}
+
 /* Only one thin band of the light blue copy shows at a time, shoved sideways.
    Bands stay in the middle 35-65% of the link, where the letters are */
 @keyframes glitch-slice {

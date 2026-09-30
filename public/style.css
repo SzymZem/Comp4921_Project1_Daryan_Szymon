@@ -111,10 +111,29 @@ nav a:hover::before {
 }
 
 /* Glitching is a lot of flashing, so calm it down for people who ask for less motion */
+/* The logo is an SVG, so text-shadow and data-text don't apply to it.
+   The split copies come from drop-shadow filters on the SVG instead,
+   and the torn slices from a copy of CMB.svg used as a mask */
+nav .logo a:hover {
+    animation: none;
+}
+
+nav .logo a:hover .nav-logo {
+    animation: glitch-svg 1.2s steps(1) infinite;
+}
+
+nav .logo a::after {
+    content: "";
+    background-color: var(--highlight-color);
+    -webkit-mask: url("/combine/CMB.svg") center / contain no-repeat;
+    mask: url("/combine/CMB.svg") center / contain no-repeat;
+}
+
 @media (prefers-reduced-motion: reduce) {
     nav a:hover,
     nav a:hover::before,
-    nav a:hover::after {
+    nav a:hover::after,
+    nav .logo a:hover .nav-logo {
         animation: none;
     }
 }
