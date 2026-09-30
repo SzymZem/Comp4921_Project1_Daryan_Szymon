@@ -154,6 +154,7 @@ a:not(:hover) {
     --ani-time: 0.25s;
     --heading-color: #3BC2B7;
     --combine-red: #E53523;
+    --background-color: #072734; /* Shown until the background gif has loaded */
     --nav-height: 6vh; /* Top navbar height, the page content is padded around it */
     --lower-nav-height: 6vh; /* Bottom bar height */
 }
@@ -189,7 +190,7 @@ a:not(:hover) {
 }
 
 .fabricator-background {
-    background: url("/combine/combine-screen.gif");
+    background: var(--background-color) url("/combine/combine-screen.gif");
     background-attachment:fixed;
     background-repeat: no-repeat;
     background-size: cover;
