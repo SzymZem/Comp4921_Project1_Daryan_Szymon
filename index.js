@@ -165,9 +165,17 @@ app.post('/submitUser', async (req, res) => {
         var success = await db_users.createUser({ user: username, hashedPassword: hashedPassword });
 
         if (success) {
-            var results = await db_users.getUsers();
+            var results = await db_users.getUser({ user: username });
 
-            res.render("submitUser", { users: results });
+            req.session.authenticated = true;
+            req.session.user_type = 'member';
+            req.session.username = username;
+            req.session.user_id = results[0].user_id;
+            req.session.cookie.maxAge = expireTime;
+
+            req.session.save(() => {
+                res.redirect('/members');
+            });
         }
         else {
             res.render("errorMessage", { error: "Failed to create user." });
