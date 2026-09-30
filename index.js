@@ -58,6 +58,7 @@ app.use(session({
 app.use((req, res, next) => {
     res.locals.loggedIn = req.session?.authenticated === true;
     res.locals.username = req.session?.username || null;
+    res.locals.currentPath = req.path;
     next();
 });
 
@@ -150,7 +151,7 @@ app.get('/members', async (req, res) => {
 
 
 app.get('/login', (req, res) => {
-    res.render("login");
+    res.render("login", { loginFailed: req.query.error !== undefined });
 });
 
 app.post('/submitUser', async (req, res) => {
@@ -203,7 +204,7 @@ app.post('/loggingin', async (req, res) => {
 
     if (results.length === 0) {
         console.log("User not found");
-        res.redirect('/login');
+        res.redirect('/login?error');
         return;
     }
 
@@ -237,7 +238,7 @@ app.post('/loggingin', async (req, res) => {
 
     console.log('user not found');
     //user and password combination not found
-    res.redirect("/login");
+    res.redirect('/login?error');
 });
 
 

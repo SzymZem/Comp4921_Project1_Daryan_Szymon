@@ -1,0 +1,11 @@
+/* Fade states toggled by combine.js. The transition itself lives on the * rule in style.css */
+
+.fade {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.fadeIn {
+    opacity: 1;
+    visibility: visible;
+}

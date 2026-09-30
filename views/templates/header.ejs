@@ -1,42 +1,53 @@
+<%
+    const navLinks = loggedIn
+        ? [{ href: "/", label: "HOME" }, { href: "/members", label: "MEMBERS" }, { href: "/logout", label: "SIGN OUT" }]
+        : [{ href: "/", label: "HOME" }, { href: "/login", label: "LOG IN" }, { href: "/signup", label: "SIGN UP" }];
+    const linkClass = (href) => currentPath === href ? "link-highlighted" : "";
+%>
 <!DOCTYPE html>
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>3920 Chat Messaging</title>
+
+    <!--Style sheets-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/animations.css">
+
+    <!--Javascript-->
+    <script src="/combine.js"></script>
+    <% if (typeof scripts !== "undefined") { %>
+        <% scripts.forEach(src => { %>
+            <script src="<%= src %>"></script>
+        <% }) %>
+    <% } %>
 </head>
 
-<body>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-    <div
-        style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid black; padding:10px;">
+<body class="fabricator-background fade">
+    <nav class="nav">
+        <ul class="fabricator-background">
+            <li class="logo">
+                <a href="/" style="padding: 0;">
+                    <svg class="nav-logo" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 749 242"><rect x="8.669" y="8.845" width="224.808" height="98.783"/><rect x="8.375" y="114.292" width="41.94" height="42.728"/><polygon points="8.474,234.244 234.263,234.244 162.918,164.075 8.474,164.075 "/><polygon points="332.653,78.622 262.487,9.238 262.487,234.244 332.653,234.244 "/><rect x="340.102" y="64.9" width="97.999" height="99.175"/><rect x="516.106" y="9.041" width="84.279" height="225.201"/><polygon points="446.332,50.005 487.1,8.845 487.1,234.24 445.94,234.24 "/><rect x="608.615" y="65.293" width="132.886" height="42.728"/><rect x="699.56" y="114.684" width="41.94" height="42.335"/><polygon points="608.226,234.146 741.5,234.146 741.5,164.075 677.609,164.075 "/></svg>
+                </a>
+            </li>
+            <div class="nav-links">
+                <% navLinks.forEach(link => { %>
+                    <li class="desktop-only"><a class="<%= linkClass(link.href) %>" href="<%= link.href %>"><%= link.label %></a></li>
+                <% }) %>
+            </div>
+            <li class="hamburger mobile-only">
+                <a class="hamburger" href="#"><svg class="hamburger" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg></a>
+            </li>
+        </ul>
 
-        <div>
-            <form action="/" method="get" style="display:inline;">
-                <button class="button" type="submit">Home</button>
-            </form>
-        </div>
-        <div class="is-vcentered has-text-centered">
-            <% if (loggedIn) { %>
+        <ul class="sidebar fabricator-background">
+            <% navLinks.forEach(link => { %>
+                <li><a class="<%= linkClass(link.href) %>" href="<%= link.href %>"><%= link.label %></a></li>
+            <% }) %>
+        </ul>
+    </nav>
 
-                <!-- <span style="vertical-align: middle;"><b>
-                        <%= username %>
-                    </b></span> -->
-
-                <form action="/logout" method="get" style="display:inline;">
-                    <button class="button" type="submit">Sign Out</button>
-                </form>
-
-                <% } else { %>
-
-                    <form action="/login" method="get" style="display:inline;">
-                        <button class="button" type="submit">Login</button>
-                    </form>
-
-                    <form action="/signup" method="get" style="display:inline;">
-                        <button class="button" type="submit">Sign Up</button>
-                    </form>
-
-                    <% } %>
-        </div>
-
-    </div>
+    <div class="content">
