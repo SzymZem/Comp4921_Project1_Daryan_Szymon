@@ -2,6 +2,7 @@ const database = require('../databaseConnection');
 
 async function createTables() {
 
+    const dropContentSQL = `DROP TABLE IF EXISTS content;`;
     const dropReactionSQL = `DROP TABLE IF EXISTS reaction;`;
     const dropMessageSQL = `DROP TABLE IF EXISTS message;`;
     const dropRoomUserSQL = `DROP TABLE IF EXISTS room_user;`;
@@ -88,9 +89,24 @@ async function createTables() {
         );
     `;
 
-
-
-
+    // content_id is the short code itself (e.g. /aB3xY9). ascii_bin makes it case-sensitive.
+    // data holds the destination URL for links (and later the text / image URL).
+    const createContentSQL = `
+        CREATE TABLE IF NOT EXISTS content (
+            content_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            user_id INT NOT NULL,
+            content_type ENUM('link', 'text', 'image') NOT NULL,
+            data TEXT NOT NULL,
+            active TINYINT(1) NOT NULL DEFAULT 1,
+            hits INT NOT NULL DEFAULT 0,
+            created_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_hit_datetime DATETIME,
+            PRIMARY KEY (content_id),
+            CONSTRAINT fk_content_user
+                FOREIGN KEY (user_id) REFERENCES user(user_id)
+                ON DELETE CASCADE
+        );
+    `;
 
     const insertEmojiDataSQL = `
         INSERT IGNORE INTO emoji (name, image)
@@ -104,6 +120,7 @@ async function createTables() {
         `;
 
     try {
+        await database.query(dropContentSQL);
         await database.query(dropReactionSQL);
         await database.query(dropMessageSQL);
         await database.query(dropRoomUserSQL);
@@ -117,6 +134,7 @@ async function createTables() {
         await database.query(createMessageSQL);
         await database.query(createEmojiSQL);
         await database.query(createReactionSQL);
+        await database.query(createContentSQL);
 
         console.log("Successfully created tables");
     }
