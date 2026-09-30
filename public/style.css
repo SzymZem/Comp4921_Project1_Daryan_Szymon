@@ -1,8 +1,9 @@
-*{
+* {
     transition: opacity var(--ani-time), visibility var(--ani-time);
-    font-family: "BoxedRSB"; /* The default font for the entire page */
+    font-family: "BoxedRSB";
+    /* The default font for the entire page */
     color: var(--text-color);
-    fill:  var(--text-color);
+    fill: var(--text-color);
     margin: 0;
     padding: 0;
 }
@@ -57,26 +58,69 @@ nav a {
     display: flex;
     align-items: center;
     text-decoration: none;
+    position: relative;
+    isolation: isolate;
 }
 
+/* The hover gif sits on its own layer so its opacity can fade both ways;
+   a background-image swap to none can't be transitioned and just pops out */
+nav a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url("/combine/combine-screen.gif");
+    background-repeat: no-repeat;
+    background-size: 10%; /* Must be a percentage, not the default auto, or the size can't animate to/from 1000% */
+    opacity: 0;
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
+}
 
 nav a:hover {
-    transition: all var(--ani-time) ease-out;
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
     color: var(--heading-color);
-    background: url("/combine/combine-screen.gif");
-    /* background-attachment:fixed; */
-    background-repeat: no-repeat;
-    background-size: 1000%; /* 10x the link's width, height follows the gif's aspect ratio */
+    animation: glitch-text 2.5s steps(1) infinite;
+}
+
+/* Copy of the label, cut into horizontal slices that jump sideways */
+nav a::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    padding: inherit;
+    display: flex;
+    align-items: center;
+    font-family: inherit;
+    color: var(--highlight-color);
+    opacity: 0;
+    pointer-events: none;
+}
+
+nav a:hover::after {
+    opacity: 0.8;
+    animation: glitch-slice 9s steps(10) infinite;
+}
+
+/* Size and position change only on hover so they animate in, and back out on unhover */
+nav a:hover::before {
+    opacity: 1;
+    background-size: 1000%;
+    /* 10x the link's width, height follows the gif's aspect ratio */
     background-position: center;
-    /* background-blend-mode: exclusion;
-    background-color: #072734; */
-    
+    animation: glitch-bg 8s steps(1) infinite;
+}
 
-
+/* Glitching is a lot of flashing, so calm it down for people who ask for less motion */
+@media (prefers-reduced-motion: reduce) {
+    nav a:hover,
+    nav a:hover::before,
+    nav a:hover::after {
+        animation: none;
+    }
 }
 
 a:not(:hover) {
-    transition: all var(--ani-time) ease-out;
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
 }
 
 
@@ -120,8 +164,8 @@ a:not(:hover) {
 }
 
 .page-id {
-   margin-left: 0.5vw;
-   font-size: 100%;
+    margin-left: 0.5vw;
+    font-size: 100%;
 }
 
 .cmb-main {
@@ -154,9 +198,13 @@ a:not(:hover) {
     --ani-time: 0.25s;
     --heading-color: #3BC2B7;
     --combine-red: #E53523;
-    --background-color: #072734; /* Shown until the background gif has loaded */
-    --nav-height: 6vh; /* Top navbar height, the page content is padded around it */
-    --lower-nav-height: 6vh; /* Bottom bar height */
+    --background-color: #072734;
+    --highlight-color: #3ED2E1; /* Bright blue used for hovers and the glitch effect */
+    /* Shown until the background gif has loaded */
+    --nav-height: 6vh;
+    /* Top navbar height, the page content is padded around it */
+    --lower-nav-height: 6vh;
+    /* Bottom bar height */
 }
 
 @font-face {
@@ -191,17 +239,19 @@ a:not(:hover) {
 
 .fabricator-background {
     background: var(--background-color) url("/combine/combine-screen.gif");
-    background-attachment:fixed;
+    background-attachment: fixed;
     background-repeat: no-repeat;
     background-size: cover;
-    image-rendering: pixelated; /* Scale the low-res gif up as sharp pixels instead of blurring it */
+    image-rendering: pixelated;
+    /* Scale the low-res gif up as sharp pixels instead of blurring it */
 }
 
 .content {
     display: flex;
     flex-direction: column;
     padding-top: 1vh;
-    padding-bottom: calc(var(--lower-nav-height) + 1vh); /* Clears the fixed bottom bar */
+    padding-bottom: calc(var(--lower-nav-height) + 1vh);
+    /* Clears the fixed bottom bar */
     font-size: 1em;
     margin-left: 2vw;
     margin-right: 2vw;
@@ -262,7 +312,8 @@ textarea:hover {
     }
 
     .content {
-        padding-top: calc(var(--nav-height) + 1vh); /* Clears the fixed navbar */
+        padding-top: calc(var(--nav-height) + 1vh);
+        /* Clears the fixed navbar */
     }
 }
 

@@ -38,7 +38,7 @@
             </li>
             <div class="nav-links">
                 <% navLinks.forEach(link => { %>
-                    <li class="desktop-only"><a class="<%= linkClass(link.href) %>" href="<%= link.href %>"><%= link.label %></a></li>
+                    <li class="desktop-only"><a class="<%= linkClass(link.href) %>" href="<%= link.href %>" data-text="<%= link.label %>"><%= link.label %></a></li>
                 <% }) %>
             </div>
             <li class="hamburger mobile-only">
@@ -48,7 +48,7 @@
 
         <ul class="sidebar fabricator-background">
             <% navLinks.forEach(link => { %>
-                <li><a class="<%= linkClass(link.href) %>" href="<%= link.href %>"><%= link.label %></a></li>
+                <li><a class="<%= linkClass(link.href) %>" href="<%= link.href %>" data-text="<%= link.label %>"><%= link.label %></a></li>
             <% }) %>
         </ul>
     </nav>
