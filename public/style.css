@@ -51,7 +51,7 @@ nav li {
     height: var(--nav-height);
 }
 
-nav a {
+a, button {
     font-family: "combine-readable";
     height: 100%;
     padding: 0 2vw;
@@ -62,9 +62,15 @@ nav a {
     isolation: isolate;
 }
 
+
+u {
+    font-family: "Combine";
+    text-decoration: none;
+}
+
 /* The hover gif sits on its own layer so its opacity can fade both ways;
    a background-image swap to none can't be transitioned and just pops out */
-nav a::before {
+a::before, button::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -76,14 +82,14 @@ nav a::before {
     transition: all calc(var(--ani-time) / 2) ease-in-out;
 }
 
-nav a:hover {
+a:hover, button:hover {
     transition: all calc(var(--ani-time) / 2) ease-in-out;
     color: var(--heading-color);
     animation: glitch-text 2.5s steps(1) infinite;
 }
 
 /* Copy of the label, cut into horizontal slices that jump sideways */
-nav a::after {
+a::after, button::after {
     content: attr(data-text);
     position: absolute;
     inset: 0;
@@ -96,13 +102,13 @@ nav a::after {
     pointer-events: none;
 }
 
-nav a:hover::after {
+a:hover::after, button:hover::after {
     opacity: 0.8;
     animation: glitch-slice 9s steps(10) infinite;
 }
 
 /* Size and position change only on hover so they animate in, and back out on unhover */
-nav a:hover::before {
+a:hover::before, button:hover::before {
     opacity: 1;
     background-size: 1000%;
     /* 10x the link's width, height follows the gif's aspect ratio */
@@ -130,9 +136,9 @@ nav .logo a::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    nav a:hover,
-    nav a:hover::before,
-    nav a:hover::after,
+    a:hover,
+    a:hover::before,
+    a:hover::after,
     nav .logo a:hover .nav-logo {
         animation: none;
     }
