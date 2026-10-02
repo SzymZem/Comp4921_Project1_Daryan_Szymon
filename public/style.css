@@ -62,6 +62,20 @@ a, button {
     isolation: isolate;
 }
 
+button[title="Click to enable"], button:hover[title="Click to enable"] {
+    border-color: var(--combine-red);
+    color: var(--combine-red);
+
+    background-color: var(--combine-red);
+
+}
+
+button[title="Click to enable"]::before, button:hover[title="Click to enable"]::before {
+
+
+    background: url("/combine/combine-screen-red.gif");
+}
+
 
 u {
     font-family: "Combine";
