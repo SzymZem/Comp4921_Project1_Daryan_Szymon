@@ -16,7 +16,7 @@ let sidebar_opened = false;
 let sidebar;
 
 document.addEventListener("DOMContentLoaded", function() {
-    underlineIntro(750);
+    underlineIntro(2000, 500);
 
     sidebar = document.querySelector(".sidebar");
 
@@ -58,9 +58,9 @@ function sidebarClickListener(event) {
 }
 
 // Underline every character on the page, then take the underlines off one at a time
-// in a random order over duration_ms. Each character gets its own span for the
+// in a random order over duration_ms, starting after delay_ms. Each character gets its own span for the
 // animation, and the spans are unwrapped at the end so the page's HTML is back to normal
-function underlineIntro(duration_ms) {
+function underlineIntro(duration_ms, delay_ms = 0) {
     // Text inside these can't hold spans, or is not visible text
     const skip_tags = ["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "SELECT", "OPTION", "TITLE", "svg"];
 
@@ -115,8 +115,11 @@ function underlineIntro(duration_ms) {
             start = timestamp;
         }
 
-        // How many underlines should be gone by now
-        let target = Math.min(spans.length, Math.ceil((timestamp - start) / duration_ms * spans.length));
+        // How many underlines should be gone by now. Cubic ease-in-out so it starts
+        // and ends at a trickle with the bulk coming off in the middle
+        let t = Math.min(1, (timestamp - start) / duration_ms);
+        let eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        let target = Math.min(spans.length, Math.ceil(eased * spans.length));
 
         for(; removed < target; removed++) {
             spans[removed].classList.remove("intro-underline");
@@ -131,7 +134,8 @@ function underlineIntro(duration_ms) {
         }
     }
 
-    requestAnimationFrame(step);
+    // Hold the full underline for delay_ms before they start coming off
+    setTimeout(() => requestAnimationFrame(step), delay_ms);
 }
 
 let animation_playing = false;
@@ -157,6 +161,7 @@ async function error_animation(element_id, times_to_flash, speed_ms) {
 
     let element_previousHTML = element.innerHTML;
 
+    await sleep(5000);
     animation_playing = true;
 
     times_to_flash = Math.round(times_to_flash + 1);

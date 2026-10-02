@@ -16,6 +16,7 @@
 .intro-underline {
     font-family: "Combine" !important;
     text-decoration: none;
+    text-transform: uppercase;
 }
 
 .intro-char {

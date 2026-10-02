@@ -82,6 +82,14 @@ u {
     text-decoration: none;
 }
 
+table, td, th {
+    border: 2px solid var(--border-color);
+}
+
+table {
+  border-collapse: collapse;
+}
+
 /* The hover gif sits on its own layer so its opacity can fade both ways;
    a background-image swap to none can't be transitioned and just pops out */
 a::before, button::before {
