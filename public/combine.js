@@ -16,6 +16,8 @@ let sidebar_opened = false;
 let sidebar;
 
 document.addEventListener("DOMContentLoaded", function() {
+    underlineIntro(750);
+
     sidebar = document.querySelector(".sidebar");
 
     // Add the event listener to listen for clicks on the hamburger button
@@ -53,6 +55,83 @@ function sidebarClickListener(event) {
     } else if(sidebar_opened && !sidebar.contains(event.target)) {
         closeSidebar();
     }
+}
+
+// Underline every character on the page, then take the underlines off one at a time
+// in a random order over duration_ms. Each character gets its own span for the
+// animation, and the spans are unwrapped at the end so the page's HTML is back to normal
+function underlineIntro(duration_ms) {
+    // Text inside these can't hold spans, or is not visible text
+    const skip_tags = ["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "SELECT", "OPTION", "TITLE", "svg"];
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+            if(!node.textContent.trim() || node.parentElement.closest(skip_tags.join(","))) {
+                return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+        }
+    });
+
+    let text_nodes = [];
+    while(walker.nextNode()) {
+        text_nodes.push(walker.currentNode);
+    }
+
+    let spans = [];
+    let parents = new Set();
+
+    // Swap each text node for one span per character (whitespace stays plain text)
+    text_nodes.forEach(node => {
+        let fragment = document.createDocumentFragment();
+
+        for(const char of node.textContent) {
+            if(char.trim() === "") {
+                fragment.appendChild(document.createTextNode(char));
+            } else {
+                let span = document.createElement("span");
+                span.className = "intro-char intro-underline";
+                span.textContent = char;
+                fragment.appendChild(span);
+                spans.push(span);
+            }
+        }
+
+        parents.add(node.parentNode);
+        node.replaceWith(fragment);
+    });
+
+    // Fisher-Yates shuffle so the underlines come off in a random order
+    for(let i = spans.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [spans[i], spans[j]] = [spans[j], spans[i]];
+    }
+
+    let start = null;
+    let removed = 0;
+
+    function step(timestamp) {
+        if(start === null) {
+            start = timestamp;
+        }
+
+        // How many underlines should be gone by now
+        let target = Math.min(spans.length, Math.ceil((timestamp - start) / duration_ms * spans.length));
+
+        for(; removed < target; removed++) {
+            spans[removed].classList.remove("intro-underline");
+        }
+
+        if(removed < spans.length) {
+            requestAnimationFrame(step);
+        } else {
+            // Put the plain text back and merge the pieces into single text nodes again
+            spans.forEach(span => span.replaceWith(span.textContent));
+            parents.forEach(parent => parent.normalize());
+        }
+    }
+
+    requestAnimationFrame(step);
 }
 
 let animation_playing = false;

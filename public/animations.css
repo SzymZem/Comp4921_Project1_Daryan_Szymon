@@ -10,6 +10,20 @@
     visibility: visible;
 }
 
+/* Per-character underline for the page load intro, removed one by one by combine.js.
+   The * rule in style.css sets font and colour on every element, so the spans
+   would override their parent's look without the inherits */
+.intro-underline {
+    font-family: "Combine" !important;
+    text-decoration: none;
+}
+
+.intro-char {
+    font-family: inherit;
+    color: inherit;
+    fill: inherit;
+}
+
 /* ----- Glitch effects for the nav link hover (used in style.css) ----- */
 
 /* The zoomed gif jumps around and flashes brighter/darker in choppy steps.
