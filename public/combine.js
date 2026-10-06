@@ -16,7 +16,7 @@ let sidebar_opened = false;
 let sidebar;
 
 document.addEventListener("DOMContentLoaded", function() {
-    underlineIntro(2000, 500);
+    underlineIntro(1000, 500);
 
     sidebar = document.querySelector(".sidebar");
 
