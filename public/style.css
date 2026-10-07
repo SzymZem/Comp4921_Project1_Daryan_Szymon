@@ -1,7 +1,7 @@
 * {
     transition: opacity var(--ani-time), visibility var(--ani-time);
     font-family: "Orbitron", sans-serif;
-    /* The default font for the entire page, loaded from Google Fonts in header.ejs */
+
     color: var(--text-color);
     fill: var(--text-color);
     margin: 0;
@@ -109,8 +109,6 @@ textarea {
 }
 
 
-/* The hover gif sits on its own layer so its opacity can fade both ways;
-   a background-image swap to none can't be transitioned and just pops out */
 a::before, button::before {
     content: "";
     position: absolute;
@@ -118,7 +116,7 @@ a::before, button::before {
     z-index: -1;
     background: url("/combine/combine-screen.gif");
     background-repeat: no-repeat;
-    background-size: 10%; /* Must be a percentage, not the default auto, or the size can't animate to/from 1000% */
+    background-size: 10%;
     opacity: 0;
     transition: all calc(var(--ani-time) / 2) ease-in-out;
 }
@@ -129,7 +127,6 @@ a:hover, button:hover {
     animation: glitch-text 2.5s steps(1) infinite;
 }
 
-/* Copy of the label, cut into horizontal slices that jump sideways */
 a::after, button::after {
     content: attr(data-text);
     position: absolute;
@@ -149,19 +146,14 @@ a:hover::after, button:hover::after {
     animation: glitch-slice 9s steps(10) infinite;
 }
 
-/* Size and position change only on hover so they animate in, and back out on unhover */
 a:hover::before, button:hover::before {
     opacity: 1;
     background-size: 1000%;
-    /* 10x the link's width, height follows the gif's aspect ratio */
+
     background-position: center;
     animation: glitch-bg 8s steps(1) infinite;
 }
 
-/* Glitching is a lot of flashing, so calm it down for people who ask for less motion */
-/* The logo is an SVG, so text-shadow and data-text don't apply to it.
-   The split copies come from drop-shadow filters on the SVG instead,
-   and the torn slices from a copy of CMB.svg used as a mask */
 nav .logo a:hover {
     animation: none;
 }
@@ -255,8 +247,6 @@ a:not(:hover) {
     margin-left: auto;
 }
 
-/* Media query */
-/* TODO: Replace the hard coded max-width with a better approcach, Because it is not going to work with too much text in the navbar */
 @media screen and (max-width: 1069px) {
     nav {
         width: 100vw;
@@ -270,7 +260,6 @@ a:not(:hover) {
 
 
 
-/* ----- presets ----- */
 
 :root {
     --border-color: #20666B;
@@ -279,12 +268,10 @@ a:not(:hover) {
     --heading-color: #3BC2B7;
     --combine-red: #E53523;
     --background-color: #072734;
-    --highlight-color: #3ED2E1; /* Bright blue used for hovers and the glitch effect */
-    /* Shown until the background gif has loaded */
+    --highlight-color: #3ED2E1; 
+
     --nav-height: 6vh;
-    /* Top navbar height, the page content is padded around it */
     --lower-nav-height: 6vh;
-    /* Bottom bar height */
 }
 
 @font-face {
@@ -349,7 +336,7 @@ b {
     flex-direction: column;
     padding-top: 1vh;
     padding-bottom: calc(var(--lower-nav-height) + 1vh);
-    /* Clears the fixed bottom bar */
+
     font-size: 1em;
     margin-left: 2vw;
     margin-right: 2vw;
@@ -382,6 +369,28 @@ button:not(:hover) {
     background-color: transparent;
 }
 
+
+input[type="file"] {
+    font-family: "combine-readable";
+    color: #3CAFB3;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    background-color: #25B6CE60;
+    color: #3ED2E1;
+}
+
+input[type="file"]::file-selector-button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 1vw;
+}
+
 input[type="text"],
 input[type="password"],
 input[type="file"],
@@ -393,8 +402,6 @@ textarea {
     margin: 0.5vh 0;
 }
 
-/* Members create form: content field and custom URL side by side, with the
-   error message and submit button spanning both columns underneath */
 .create-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -428,8 +435,7 @@ textarea {
     box-sizing: border-box;
 }
 
-/* :user-invalid only matches once the user has tried to submit (or edited the
-   field), so the required field isn't red on page load */
+
 .create-form :required:user-invalid,
 .create-form :required:user-invalid:hover {
     border-color: var(--combine-red);
@@ -459,7 +465,6 @@ h3 {
     color: var(--heading-color);
 }
 
-/* White-on-transparent barcode used as a mask so it takes the Combine blue */
 .barcode {
     height: 60%;
     aspect-ratio: 1604 / 590;
