@@ -2,7 +2,11 @@ const database = require('../databaseConnection');
 
 async function createTables() {
 
+    // content was the old single table that the link/image/text tables replace
     const dropContentSQL = `DROP TABLE IF EXISTS content;`;
+    const dropLinkSQL = `DROP TABLE IF EXISTS link;`;
+    const dropImageSQL = `DROP TABLE IF EXISTS image;`;
+    const dropTextSQL = `DROP TABLE IF EXISTS text;`;
     const dropReactionSQL = `DROP TABLE IF EXISTS reaction;`;
     const dropMessageSQL = `DROP TABLE IF EXISTS message;`;
     const dropRoomUserSQL = `DROP TABLE IF EXISTS room_user;`;
@@ -89,20 +93,53 @@ async function createTables() {
         );
     `;
 
-    // content_id is the short code itself (e.g. /aB3xY9). ascii_bin makes it case-sensitive.
-    // data holds the destination URL for links (and later the text / image URL).
-    const createContentSQL = `
-        CREATE TABLE IF NOT EXISTS content (
-            content_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    // Each content type gets its own table. The *_id is the short code itself (e.g. /aB3xY9),
+    // and ascii_bin makes it case-sensitive. Codes share one namespace at the site root, so
+    // uniqueness across the three tables is enforced in database/content.js rather than by a
+    // shared link table (see the ERD note).
+    const createLinkSQL = `
+        CREATE TABLE IF NOT EXISTS link (
+            link_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
             user_id INT NOT NULL,
-            content_type ENUM('link', 'text', 'image') NOT NULL,
-            data TEXT NOT NULL,
-            active TINYINT(1) NOT NULL DEFAULT 1,
-            hits INT NOT NULL DEFAULT 0,
+            link_to TEXT NOT NULL,
             created_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             last_hit_datetime DATETIME,
-            PRIMARY KEY (content_id),
-            CONSTRAINT fk_content_user
+            hits INT NOT NULL DEFAULT 0,
+            active TINYINT(1) NOT NULL DEFAULT 1,
+            PRIMARY KEY (link_id),
+            CONSTRAINT fk_link_user
+                FOREIGN KEY (user_id) REFERENCES user(user_id)
+                ON DELETE CASCADE
+        );
+    `;
+
+    const createImageSQL = `
+        CREATE TABLE IF NOT EXISTS image (
+            image_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            user_id INT NOT NULL,
+            image_public_id VARCHAR(255) NOT NULL,
+            created_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_hit_datetime DATETIME,
+            hits INT NOT NULL DEFAULT 0,
+            active TINYINT(1) NOT NULL DEFAULT 1,
+            PRIMARY KEY (image_id),
+            CONSTRAINT fk_image_user
+                FOREIGN KEY (user_id) REFERENCES user(user_id)
+                ON DELETE CASCADE
+        );
+    `;
+
+    const createTextSQL = `
+        CREATE TABLE IF NOT EXISTS text (
+            text_id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            user_id INT NOT NULL,
+            text_value TEXT NOT NULL,
+            created_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_hit_datetime DATETIME,
+            hits INT NOT NULL DEFAULT 0,
+            active TINYINT(1) NOT NULL DEFAULT 1,
+            PRIMARY KEY (text_id),
+            CONSTRAINT fk_text_user
                 FOREIGN KEY (user_id) REFERENCES user(user_id)
                 ON DELETE CASCADE
         );
@@ -121,6 +158,9 @@ async function createTables() {
 
     try {
         await database.query(dropContentSQL);
+        await database.query(dropLinkSQL);
+        await database.query(dropImageSQL);
+        await database.query(dropTextSQL);
         await database.query(dropReactionSQL);
         await database.query(dropMessageSQL);
         await database.query(dropRoomUserSQL);
@@ -134,7 +174,9 @@ async function createTables() {
         await database.query(createMessageSQL);
         await database.query(createEmojiSQL);
         await database.query(createReactionSQL);
-        await database.query(createContentSQL);
+        await database.query(createLinkSQL);
+        await database.query(createImageSQL);
+        await database.query(createTextSQL);
 
         console.log("Successfully created tables");
     }
