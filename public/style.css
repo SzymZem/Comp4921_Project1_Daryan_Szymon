@@ -96,6 +96,14 @@ table {
   padding-top: 50vh;
 }
 
+.qr-code {
+    display: block;
+    width: 6vw;
+    min-width: 12vh;
+    aspect-ratio: 1;
+    image-rendering: pixelated;
+}
+
 .spacing {
     border-right: none;
     border-left: none;

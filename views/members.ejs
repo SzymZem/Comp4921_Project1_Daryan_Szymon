@@ -78,6 +78,7 @@
                 <table class="table is-fullwidth is-hoverable">
                     <tr>
                         <th>Short URL</th>
+                        <th>QR</th>
                         <th><%= type === 'link' ? 'URL' : type === 'image' ? 'Image' : 'Text' %></th>
                         <th>Hits</th>
                         <th>Active</th>
@@ -89,6 +90,7 @@
                     <% contents.forEach(item => { %>
                         <tr>
                             <td><a href="/<%= item.content_id %>" target="_blank"><%= baseUrl %>/<%= item.content_id %></a></td>
+                            <td><img class="qr-code" src="<%= item.qr %>" alt="QR code for <%= baseUrl %>/<%= item.content_id %>"></td>
                             <td>
                                 <% if (type === 'link') { %>
                                     <a href="<%= item.data %>" target="_blank" rel="noopener noreferrer"><%= item.data %></a>
