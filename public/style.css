@@ -96,10 +96,15 @@ table {
   padding-top: 50vh;
 }
 
-.qr-code {
-    display: block;
+.qr-wrap {
+    position: relative;
     width: 6vw;
     min-width: 12vh;
+}
+
+.qr-code {
+    display: block;
+    width: 100%;
     aspect-ratio: 1;
     image-rendering: pixelated;
 }
