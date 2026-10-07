@@ -482,6 +482,8 @@ h3 {
     height: 60%;
     aspect-ratio: 1604 / 590;
     margin-left: 0.5vw;
+    object-fit: none;
+    object-position: 100vw 0;
     background-color: var(--text-color);
     -webkit-mask: url("/combine/barcode.png") center / contain no-repeat;
     mask: url("/combine/barcode.png") center / contain no-repeat;
