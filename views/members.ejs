@@ -4,11 +4,12 @@
 
 
         <div class="content">
-            <h1 class="header">Hello, <%= username %>
+            <h1 class="header"><u>E</u><%= username %> </h1>  
             </h1>
 
 
 
+            <hr>
 
             <div class="tabs">
                 <ul>
@@ -18,7 +19,9 @@
                 </ul>
             </div>
 
-            <form class="box" action="/content/create" method="post"
+            <hr class="spacing">
+
+            <form class="box create-form" action="/content/create" method="post"
                 <% if (type === 'image') { %>enctype="multipart/form-data"<% } %>>
                 <input type="hidden" name="type" value="<%= type %>">
 
@@ -50,7 +53,7 @@
                     <label class="label">Custom short URL (optional)</label>
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static"><%= baseUrl %>/</span>
+                            <span class="button is-static highlight"><%= baseUrl %>/</span>
                         </div>
                         <div class="control is-expanded">
                             <input class="input" type="text" name="customCode" placeholder="leave blank for random"
@@ -67,8 +70,11 @@
                 <button class="button is-primary" type="submit">Create short URL</button>
             </form>
 
+            <div class="spacing"> </div>
+            <div class="spacing"> </div>
+
             <% if (contents.length === 0) { %>
-                <p>You haven't created any <%= type === 'link' ? 'links' : type === 'image' ? 'images' : 'text' %> yet.</p>
+                <p>CIVIL PROTECTION WARNING:<br><b> NO <%= type === 'link' ? 'LINKS' : type === 'image' ? 'IMAGES' : 'TEXT' %> SUBMITTED. </b><br> RESPOND, ISOLATE, INQUIRE. <br>FAILURE TO COOPERATE WILL RESULT IN PERMANENT OFF-WORLD RELOCATION.</p>
             <% } else { %>
                 <table class="table is-fullwidth is-hoverable">
                     <tr>

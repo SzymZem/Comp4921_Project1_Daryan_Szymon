@@ -29,7 +29,11 @@ nav {
 nav ul {
     width: 100%;
     list-style: none;
+
     display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-logo {
@@ -88,7 +92,22 @@ table, td, th {
 
 table {
   border-collapse: collapse;
+
+  padding-top: 50vh;
 }
+
+.spacing {
+    border-right: none;
+    border-left: none;
+    margin-bottom: 5vh;
+    
+}
+
+textarea {
+    resize: vertical;
+
+}
+
 
 /* The hover gif sits on its own layer so its opacity can fade both ways;
    a background-image swap to none can't be transitioned and just pops out */
@@ -123,6 +142,7 @@ a::after, button::after {
     opacity: 0;
     pointer-events: none;
 }
+
 
 a:hover::after, button:hover::after {
     opacity: 0.8;
@@ -171,8 +191,21 @@ a:not(:hover) {
 }
 
 
-.link-highlighted {
+.link-highlighted,
+.tabs li.is-active a {
     color: var(--heading-color);
+}
+
+.tabs ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.tabs li {
+    height: var(--nav-height);
 }
 
 .hamburger {
@@ -282,8 +315,18 @@ a:not(:hover) {
     font-family: "combine-readable";
 }
 
+b {
+
+    font-weight: bold;
+    color: #E53523;
+}
+
 .combine-red {
     color: #E53523;
+}
+
+.highlight {
+    color: var(--highlight-color);
 }
 
 .mobile-only {
@@ -299,8 +342,6 @@ a:not(:hover) {
     background-attachment: fixed;
     background-repeat: no-repeat;
     background-size: cover;
-    image-rendering: pixelated;
-    /* Scale the low-res gif up as sharp pixels instead of blurring it */
 }
 
 .content {
@@ -352,6 +393,41 @@ textarea {
     margin: 0.5vh 0;
 }
 
+/* Members create form: content field and custom URL side by side, with the
+   error message and submit button spanning both columns underneath */
+.create-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2vw;
+    row-gap: 1vh;
+    align-items: start;
+}
+
+.create-form > .notification,
+.create-form > button {
+    grid-column: 1 / -1;
+}
+
+.create-form > button {
+    justify-content: center;
+    padding: 1vh 2vw;
+}
+
+.create-form .has-addons {
+    display: flex;
+    align-items: center;
+}
+
+.create-form .is-expanded {
+    flex: 1;
+}
+
+.create-form input:not([type="hidden"]),
+.create-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 input[type="text"]:hover,
 input[type="password"]:hover,
 input[type="file"]:hover,
@@ -395,3 +471,6 @@ h3 {
     -webkit-mask: url("/combine/barcode.png") center / contain no-repeat;
     mask: url("/combine/barcode.png") center / contain no-repeat;
 }
+
+
+
