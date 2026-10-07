@@ -447,21 +447,6 @@ textarea:hover {
     border: 2px solid #3ED2E1;
 }
 
-/* @media screen and (max-width: 1069px) {
-    .mobile-only {
-        display: block;
-    }
-
-    .desktop-only {
-        display: none;
-    }
-
-    .content {
-        padding-top: calc(var(--nav-height) + 1vh);
-        /* Clears the fixed navbar */
-    }
-} */
-
 h1 {
     color: var(--heading-color);
 }
