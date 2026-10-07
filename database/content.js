@@ -8,6 +8,15 @@ const CUSTOM_CODE_REGEX = /^[A-Za-z0-9_-]{3,32}$/;
 const MAX_TEXT_LENGTH = 10000;
 const CONTENT_TYPES = ['link', 'text', 'image'];
 
+// Each content type has its own table. Queries alias the columns back to
+// content_id / data so callers and views don't care which table a row came from.
+// These names come from this fixed map only, never from user input.
+const CONTENT_TABLES = {
+	link: { table: 'link', id: 'link_id', value: 'link_to' },
+	text: { table: 'text', id: 'text_id', value: 'text_value' },
+	image: { table: 'image', id: 'image_id', value: 'image_public_id' }
+};
+
 // Short codes live at the site root (e.g. /abc123), so they can't collide with
 // our own single-segment routes. Express routing is case-insensitive, so compare lowercase.
 const RESERVED_CODES = new Set([
@@ -62,17 +71,35 @@ function normalizeUrl(input) {
 	}
 }
 
-// Duplicate codes are rejected by the PRIMARY KEY, so two requests racing
-// for the same code can't both succeed - the loser gets ER_DUP_ENTRY.
+// Duplicate codes within one table are rejected by its PRIMARY KEY, so two requests
+// racing for the same code can't both succeed - the loser gets ER_DUP_ENTRY.
+// Codes also have to be unique across all three tables, which no single key covers,
+// so after inserting we check the other tables and back out if the code is there.
+// If two inserts into different tables race, each sees the other and both back out,
+// which is safe: neither code ends up shared.
 async function insertContent(contentId, userId, contentType, data) {
+	const t = CONTENT_TABLES[contentType];
 	let insertSQL = `
-		INSERT INTO content
-		(content_id, user_id, content_type, data)
+		INSERT INTO \`${t.table}\`
+		(${t.id}, user_id, ${t.value})
 		VALUES
-		(?, ?, ?, ?);
+		(?, ?, ?);
 	`;
 
-	await database.query(insertSQL, [contentId, userId, contentType, data]);
+	await database.query(insertSQL, [contentId, userId, data]);
+
+	const others = CONTENT_TYPES.filter(type => type !== contentType).map(type => CONTENT_TABLES[type]);
+	let takenSQL = others
+		.map(o => `SELECT 1 FROM \`${o.table}\` WHERE ${o.id} = ?`)
+		.join(' UNION ALL ');
+
+	const [rows] = await database.query(takenSQL, others.map(() => contentId));
+	if (rows.length > 0) {
+		await database.query(`DELETE FROM \`${t.table}\` WHERE ${t.id} = ?;`, [contentId]);
+		const err = new Error("Short code already used by another content type");
+		err.code = 'ER_DUP_ENTRY';
+		throw err;
+	}
 }
 
 async function createContent(userId, contentType, data, customCode) {
@@ -111,14 +138,18 @@ async function createContent(userId, contentType, data, customCode) {
 }
 
 async function getContent(contentId) {
-	let getContentSQL = `
-		SELECT content_id, user_id, content_type, data, active
-		FROM content
-		WHERE content_id = ?;
-	`;
+	let getContentSQL = CONTENT_TYPES
+		.map(type => {
+			const t = CONTENT_TABLES[type];
+			return `
+				SELECT ${t.id} AS content_id, user_id, '${type}' AS content_type, ${t.value} AS data, active
+				FROM \`${t.table}\`
+				WHERE ${t.id} = ?`;
+		})
+		.join(' UNION ALL ') + ';';
 
 	try {
-		const [rows] = await database.query(getContentSQL, [contentId]);
+		const [rows] = await database.query(getContentSQL, CONTENT_TYPES.map(() => contentId));
 		return rows[0] || null;
 	}
 	catch (err) {
@@ -129,15 +160,17 @@ async function getContent(contentId) {
 }
 
 async function getUserContent(userId, contentType) {
+	const t = CONTENT_TABLES[contentType];
 	let getUserContentSQL = `
-		SELECT content_id, content_type, data, active, hits, created_datetime, last_hit_datetime
-		FROM content
-		WHERE user_id = ? AND content_type = ?
+		SELECT ${t.id} AS content_id, '${contentType}' AS content_type, ${t.value} AS data,
+			active, hits, created_datetime, last_hit_datetime
+		FROM \`${t.table}\`
+		WHERE user_id = ?
 		ORDER BY created_datetime DESC;
 	`;
 
 	try {
-		const [rows] = await database.query(getUserContentSQL, [userId, contentType]);
+		const [rows] = await database.query(getUserContentSQL, [userId]);
 		return rows;
 	}
 	catch (err) {
@@ -147,11 +180,12 @@ async function getUserContent(userId, contentType) {
 	}
 }
 
-async function recordHit(contentId) {
+async function recordHit(contentType, contentId) {
+	const t = CONTENT_TABLES[contentType];
 	let recordHitSQL = `
-		UPDATE content
+		UPDATE \`${t.table}\`
 		SET hits = hits + 1, last_hit_datetime = NOW()
-		WHERE content_id = ?;
+		WHERE ${t.id} = ?;
 	`;
 
 	try {
@@ -165,11 +199,12 @@ async function recordHit(contentId) {
 
 // The user_id check makes these no-ops on content the user doesn't own.
 // Returns true only if a row owned by the user was changed.
-async function toggleActive(contentId, userId) {
+async function toggleActive(contentType, contentId, userId) {
+	const t = CONTENT_TABLES[contentType];
 	let toggleSQL = `
-		UPDATE content
+		UPDATE \`${t.table}\`
 		SET active = NOT active
-		WHERE content_id = ? AND user_id = ?;
+		WHERE ${t.id} = ? AND user_id = ?;
 	`;
 
 	try {
@@ -183,10 +218,11 @@ async function toggleActive(contentId, userId) {
 	}
 }
 
-async function deleteContent(contentId, userId) {
+async function deleteContent(contentType, contentId, userId) {
+	const t = CONTENT_TABLES[contentType];
 	let deleteSQL = `
-		DELETE FROM content
-		WHERE content_id = ? AND user_id = ?;
+		DELETE FROM \`${t.table}\`
+		WHERE ${t.id} = ? AND user_id = ?;
 	`;
 
 	try {

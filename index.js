@@ -439,17 +439,18 @@ app.post('/content/create', (req, res) => {
 });
 
 app.post('/content/:id/toggle', async (req, res) => {
-    const updated = await db_content.toggleActive(req.params.id, req.session.user_id);
+    const content = await db_content.getContent(req.params.id);
+    const updated = content && await db_content.toggleActive(content.content_type, req.params.id, req.session.user_id);
     if (!updated) {
         res.status(400).render("errorMessage", { error: "You can only edit your own content." });
         return;
     }
-    res.redirect('/members?type=' + contentTypeOrDefault(req.body.type));
+    res.redirect('/members?type=' + content.content_type);
 });
 
 app.post('/content/:id/delete', async (req, res) => {
     const content = await db_content.getContent(req.params.id);
-    const deleted = content && await db_content.deleteContent(req.params.id, req.session.user_id);
+    const deleted = content && await db_content.deleteContent(content.content_type, req.params.id, req.session.user_id);
     if (!deleted) {
         res.status(400).render("errorMessage", { error: "You can only delete your own content." });
         return;
@@ -700,7 +701,7 @@ app.get('/:code', async (req, res, next) => {
         return;
     }
 
-    await db_content.recordHit(content.content_id);
+    await db_content.recordHit(content.content_type, content.content_id);
 
     if (content.content_type === 'link') {
         // 302 (not 301) so browsers don't cache the redirect and skip our hit counter
@@ -726,6 +727,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
-
-
