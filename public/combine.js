@@ -92,6 +92,8 @@ function underlineIntro(duration_ms, delay_ms = 0) {
                 let span = document.createElement("span");
                 span.className = "intro-char intro-underline";
                 span.textContent = char;
+                span.style.animationDelay = (-Math.random() * 2.5) + "s";
+                span.style.animationDuration = (2 + Math.random()) + "s";
                 fragment.appendChild(span);
                 spans.push(span);
             }
