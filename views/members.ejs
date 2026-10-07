@@ -56,11 +56,10 @@
                             <span class="button is-static highlight"><%= baseUrl %>/</span>
                         </div>
                         <div class="control is-expanded">
-                            <input class="input" type="text" name="customCode" placeholder="leave blank for random"
+                            <input class="input" type="text" name="customCode" placeholder="3-32 characters: letters, numbers, - and _ (leave blank for random )"
                                 value="<%= form.customCode %>" pattern="[A-Za-z0-9_\-]{3,32}">
                         </div>
                     </div>
-                    <p class="help">3-32 characters: letters, numbers, - and _</p>
                 </div>
 
                 <% if (error) { %>
