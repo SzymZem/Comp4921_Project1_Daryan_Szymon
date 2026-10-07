@@ -561,3 +561,38 @@ h3 {
     justify-content: center;
     gap: 1rem;
 }
+
+/* Long URLs in the dashboard: one truncated line by default, wraps downward when expanded */
+.long-value {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-width: 30vw;
+}
+
+.long-value-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.long-value.is-expanded .long-value-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.long-value-toggle {
+    flex-shrink: 0;
+    transition: transform var(--ani-time) ease-out;
+}
+
+.long-value.is-expanded .long-value-toggle {
+    transform: rotate(180deg);
+}
+
+@media screen and (max-width: 1069px) {
+    .long-value {
+        max-width: 60vw;
+    }
+}
