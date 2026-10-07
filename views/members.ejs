@@ -72,6 +72,8 @@
             <div class="spacing"> </div>
             <div class="spacing"> </div>
 
+            <h2 class="header">YOUR <%= type === 'link' ? 'LINKS' : type === 'image' ? 'IMAGES' : 'TEXT' %></h2>
+
             <% if (contents.length === 0) { %>
                 <p>CIVIL PROTECTION WARNING:<br><b> NO <%= type === 'link' ? 'LINKS' : type === 'image' ? 'IMAGES' : 'TEXT' %> SUBMITTED. </b><br> RESPOND, ISOLATE, INQUIRE. <br>FAILURE TO COOPERATE WILL RESULT IN PERMANENT OFF-WORLD RELOCATION.</p>
             <% } else { %>
@@ -89,7 +91,11 @@
                     <% const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'; %>
                     <% contents.forEach(item => { %>
                         <tr>
-                            <td><a href="/<%= item.content_id %>" target="_blank"><%= baseUrl %>/<%= item.content_id %></a></td>
+                            <td>
+                                <a href="/<%= item.content_id %>" target="_blank"><%= baseUrl %>/<%= item.content_id %></a>
+                                <button class="button is-small copy-button" type="button" data-copy="<%= baseUrl %>/<%= item.content_id %>"
+                                    onclick="copyShortUrl(this)" title="Copy short URL">Copy</button>
+                            </td>
                             <td><div class="qr-wrap"><img class="qr-code" src="<%= item.qr %>" alt="QR code for <%= baseUrl %>/<%= item.content_id %>"></div></td>
                             <td>
                                 <% if (type === 'link') { %>
@@ -130,4 +136,12 @@
         <% } else { %>
             <img src="https://media1.tenor.com/m/mVZ8kHeWAdgAAAAd/are-you-still-tdere-hello.gif">
             <% } %>
+                <script>
+                    function copyShortUrl(button) {
+                        navigator.clipboard.writeText(button.dataset.copy).then(() => {
+                            button.textContent = 'Copied!';
+                            setTimeout(() => { button.textContent = 'Copy'; }, 1500);
+                        });
+                    }
+                </script>
                 <%- include("templates/footer") %>
