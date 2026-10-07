@@ -23,15 +23,14 @@
     background-size: 1000%;
 }
 
-/* QR code version of the intro: combine.js lays a grid of these cells over each QR
-   code and strips the class off them one by one, along with the characters */
-.qr-intro-overlay {
-    position: absolute;
-    inset: 0;
+.intro-overlay {
+    position: fixed;
     display: grid;
+    z-index: 10000;
+    pointer-events: none;
 }
 
-.qr-intro-cell {
+.intro-cell {
     background: var(--background-color) url("/combine/combine-screen.gif") no-repeat;
     background-size: 1000%;
     animation: glitch-bg 1s steps(1) infinite;

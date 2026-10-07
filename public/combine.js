@@ -93,27 +93,56 @@ function underlineIntro(duration_ms, delay_ms = 0) {
         node.replaceWith(fragment);
     });
 
-    const qr_grid_size = 6;
+    const grid_size = 6;
     let overlays = [];
     let cells = [];
 
-    document.querySelectorAll(".qr-wrap").forEach(wrap => {
-        let overlay = document.createElement("div");
-        overlay.className = "qr-intro-overlay";
-        overlay.style.gridTemplateColumns = "repeat(" + qr_grid_size + ", 1fr)";
+    // Overlays go on <body> and follow their image, so no page element gets wrapped
+    document.querySelectorAll("img, svg").forEach(target => {
+        if(target.parentElement.closest("svg")) {
+            return;
+        }
 
-        for(let i = 0; i < qr_grid_size * qr_grid_size; i++) {
+        let overlay = document.createElement("div");
+        overlay.className = "intro-overlay";
+        overlay.style.gridTemplateColumns = "repeat(" + grid_size + ", 1fr)";
+
+        for(let i = 0; i < grid_size * grid_size; i++) {
             let cell = document.createElement("div");
-            cell.className = "qr-intro-cell";
+            cell.className = "intro-cell";
             cell.style.animationDelay = (-Math.random() * 2.5) + "s";
             cell.style.animationDuration = (0.5 + Math.random()) + "s";
             overlay.appendChild(cell);
             cells.push(cell);
         }
 
-        wrap.appendChild(overlay);
-        overlays.push(overlay);
+        document.body.appendChild(overlay);
+        overlays.push({ overlay: overlay, target: target });
     });
+
+    let tracking = overlays.length > 0;
+
+    // Every frame, so overlays keep up with scrolling and images that load late
+    function trackOverlays() {
+        if(!tracking) {
+            return;
+        }
+
+        overlays.forEach(({ overlay, target }) => {
+            let rect = target.getBoundingClientRect();
+            let visible = !target.checkVisibility || target.checkVisibility({ visibilityProperty: true });
+
+            overlay.style.display = visible ? "" : "none";
+            overlay.style.left = rect.left + "px";
+            overlay.style.top = rect.top + "px";
+            overlay.style.width = rect.width + "px";
+            overlay.style.height = rect.height + "px";
+        });
+
+        requestAnimationFrame(trackOverlays);
+    }
+
+    trackOverlays();
 
     let items = spans.concat(cells);
 
@@ -135,7 +164,7 @@ function underlineIntro(duration_ms, delay_ms = 0) {
         let target = Math.min(items.length, Math.ceil(eased * items.length));
 
         for(; removed < target; removed++) {
-            items[removed].classList.remove("intro-underline", "qr-intro-cell");
+            items[removed].classList.remove("intro-underline", "intro-cell");
         }
 
         if(removed < items.length) {
@@ -143,7 +172,8 @@ function underlineIntro(duration_ms, delay_ms = 0) {
         } else {
             spans.forEach(span => span.replaceWith(span.textContent));
             parents.forEach(parent => parent.normalize());
-            overlays.forEach(overlay => overlay.remove());
+            tracking = false;
+            overlays.forEach(({ overlay }) => overlay.remove());
         }
     }
 
