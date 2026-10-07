@@ -6,6 +6,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
+const QRCode = require('qrcode');
 const saltRounds = 12;
 
 
@@ -125,6 +126,16 @@ function contentTypeOrDefault(type) {
 async function renderMembers(req, res, type, error, form) {
     const groups = await db_users.getUserGroups(req.session.user_id);
     const contents = await db_content.getUserContent(req.session.user_id, type);
+    const baseUrl = req.protocol + '://' + req.get('host');
+
+    for (const item of contents) {
+        const svg = await QRCode.toString(baseUrl + '/' + item.content_id, {
+            type: 'svg',
+            margin: 2,
+            color: { dark: '#072734', light: '#3ED2E1' }
+        });
+        item.qr = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    }
 
     res.render('members', {
         loggedIn: true,
@@ -134,7 +145,7 @@ async function renderMembers(req, res, type, error, form) {
         contents: contents,
         imageUrl: imageUrl,
         maxTextLength: db_content.MAX_TEXT_LENGTH,
-        baseUrl: req.protocol + '://' + req.get('host'),
+        baseUrl: baseUrl,
         error: error || null,
         form: form || { url: "", text: "", customCode: "" }
     });
