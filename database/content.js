@@ -22,8 +22,83 @@ const CONTENT_TABLES = {
 const RESERVED_CODES = new Set([
 	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'login',
 	'submituser', 'loggingin', 'logout', 'loggedin', 'api', 'creategroup', 'group',
-	'message', 'links', 'content', 'emojis'
+	'message', 'links', 'content', 'emojis', 'leaderboard'
 ]);
+
+// --- Leaderboard scoring ---
+// A link's score is how many characters the short URL saved. To stop people gaming it,
+// padding is stripped before measuring and known "make my URL huge" sites score 0.
+const MAX_SCORED_URL_LENGTH = 2048;
+const TRACKING_PARAM_REGEX = /^(utm_.*|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|yclid|_ga|_gl|ref|ref_src)$/i;
+const BLOCKED_HOSTS = [
+	// long-URL generators
+	'longurlmaker.com', 'hugeurl.com', 'shadyurl.com', 'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong.com',
+	'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com', 'thelongesturl.com', 'hugelink.com',
+	'longurl.org', 'urlextender.com', 'makeitlong.com', 'lengthenurl.com', 'longify.com',
+	// other shorteners (shortening a short link isn't a real shortening)
+	'bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'ow.ly', 'is.gd', 'buff.ly', 'rebrand.ly', 'cutt.ly', 'shorturl.at', 'tiny.cc'
+];
+
+function isBlockedHost(hostname, ownHost) {
+	const host = hostname.toLowerCase();
+	if (ownHost && host === ownHost.toLowerCase()) {
+		return true;
+	}
+	return BLOCKED_HOSTS.some(blocked => host === blocked || host.endsWith('.' + blocked));
+}
+
+// Catches generated gibberish the blocklist doesn't know about.
+function looksPadded(parsed) {
+	const labels = parsed.hostname.split('.');
+	if (labels.some(label => label.length > 40) || /(.)\1{7,}/.test(parsed.hostname)) {
+		return true;
+	}
+	const rest = decodeURIComponentSafe(parsed.pathname + parsed.search);
+	if (/(.)\1{14,}/.test(rest)) {
+		return true;
+	}
+	return rest.split(/[\/?&=]/).some(segment => segment.length > 200);
+}
+
+function decodeURIComponentSafe(s) {
+	try {
+		return decodeURIComponent(s);
+	}
+	catch (err) {
+		return s;
+	}
+}
+
+// Removes the parts of a URL that don't change where it goes: #fragment, tracking
+// params, empty params and trailing slashes.
+function stripPadding(url) {
+	const parsed = new URL(url);
+	parsed.hash = '';
+	for (const key of [...parsed.searchParams.keys()]) {
+		if (TRACKING_PARAM_REGEX.test(key) || parsed.searchParams.get(key) === '') {
+			parsed.searchParams.delete(key);
+		}
+	}
+	parsed.pathname = parsed.pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
+	return parsed;
+}
+
+// Returns { scoredUrl, charsSaved }. charsSaved is 0 when the link isn't eligible.
+function scoreLink(url, code, baseUrl) {
+	try {
+		const parsed = stripPadding(url);
+		const scoredUrl = parsed.href;
+		const ownHost = baseUrl ? new URL(baseUrl).hostname : null;
+		if (scoredUrl.length > MAX_SCORED_URL_LENGTH || isBlockedHost(parsed.hostname, ownHost) || looksPadded(parsed)) {
+			return { scoredUrl, charsSaved: 0 };
+		}
+		const shortLength = (baseUrl + '/' + code).length;
+		return { scoredUrl, charsSaved: Math.max(0, scoredUrl.length - shortLength) };
+	}
+	catch (err) {
+		return { scoredUrl: null, charsSaved: 0 };
+	}
+}
 
 function isReservedCode(code) {
 	return RESERVED_CODES.has(code.toLowerCase());
@@ -77,16 +152,31 @@ function normalizeUrl(input) {
 // so after inserting we check the other tables and back out if the code is there.
 // If two inserts into different tables race, each sees the other and both back out,
 // which is safe: neither code ends up shared.
-async function insertContent(contentId, userId, contentType, data) {
+async function insertContent(contentId, userId, contentType, data, options = {}) {
 	const t = CONTENT_TABLES[contentType];
-	let insertSQL = `
-		INSERT INTO \`${t.table}\`
-		(${t.id}, user_id, ${t.value})
-		VALUES
-		(?, ?, ?);
-	`;
-
-	await database.query(insertSQL, [contentId, userId, data]);
+	if (contentType === 'link') {
+		// custom codes never score, so there's no point measuring them
+		const isCustom = options.isCustom ? 1 : 0;
+		const { scoredUrl, charsSaved } = isCustom
+			? { scoredUrl: null, charsSaved: 0 }
+			: scoreLink(data, contentId, options.baseUrl);
+		let insertLinkSQL = `
+			INSERT INTO link
+			(link_id, user_id, link_to, is_custom, scored_url, chars_saved)
+			VALUES
+			(?, ?, ?, ?, ?, ?);
+		`;
+		await database.query(insertLinkSQL, [contentId, userId, data, isCustom, scoredUrl, charsSaved]);
+	}
+	else {
+		let insertSQL = `
+			INSERT INTO \`${t.table}\`
+			(${t.id}, user_id, ${t.value})
+			VALUES
+			(?, ?, ?);
+		`;
+		await database.query(insertSQL, [contentId, userId, data]);
+	}
 
 	const others = CONTENT_TYPES.filter(type => type !== contentType).map(type => CONTENT_TABLES[type]);
 	let takenSQL = others
@@ -102,10 +192,10 @@ async function insertContent(contentId, userId, contentType, data) {
 	}
 }
 
-async function createContent(userId, contentType, data, customCode) {
+async function createContent(userId, contentType, data, customCode, baseUrl) {
 	if (customCode) {
 		try {
-			await insertContent(customCode, userId, contentType, data);
+			await insertContent(customCode, userId, contentType, data, { isCustom: true, baseUrl });
 			return { success: true, contentId: customCode };
 		}
 		catch (err) {
@@ -121,7 +211,7 @@ async function createContent(userId, contentType, data, customCode) {
 	for (let attempt = 0; attempt < MAX_GENERATE_ATTEMPTS; attempt++) {
 		const code = generateCode();
 		try {
-			await insertContent(code, userId, contentType, data);
+			await insertContent(code, userId, contentType, data, { baseUrl });
 			return { success: true, contentId: code };
 		}
 		catch (err) {
@@ -197,6 +287,56 @@ async function recordHit(contentType, contentId) {
 	}
 }
 
+// Only visits from someone other than the owner count toward the leaderboard.
+async function recordExternalHit(linkId) {
+	let recordExternalHitSQL = `
+		UPDATE link
+		SET external_hits = external_hits + 1
+		WHERE link_id = ?;
+	`;
+
+	try {
+		await database.query(recordExternalHitSQL, [linkId]);
+	}
+	catch (err) {
+		console.log("Error recording external hit");
+		console.log(err);
+	}
+}
+
+// Each user's single best qualifying link. The inner ROW_NUMBER picks one link per
+// user per destination (no duplicate URLs), the outer one picks the user's best.
+async function getLeaderboard(limit = 25) {
+	let getLeaderboardSQL = `
+		SELECT u.username, best.link_id, best.link_to, best.chars_saved
+		FROM (
+			SELECT dedup.*,
+				ROW_NUMBER() OVER (PARTITION BY dedup.user_id ORDER BY dedup.chars_saved DESC, dedup.created_datetime) AS user_rank
+			FROM (
+				SELECT link_id, user_id, link_to, chars_saved, created_datetime,
+					ROW_NUMBER() OVER (PARTITION BY user_id, scored_url ORDER BY created_datetime) AS dup_rank
+				FROM link
+				WHERE is_custom = 0 AND active = 1 AND external_hits >= 1 AND chars_saved > 0
+			) dedup
+			WHERE dedup.dup_rank = 1
+		) best
+		JOIN user u ON u.user_id = best.user_id
+		WHERE best.user_rank = 1
+		ORDER BY best.chars_saved DESC, best.created_datetime
+		LIMIT ?;
+	`;
+
+	try {
+		const [rows] = await database.query(getLeaderboardSQL, [limit]);
+		return rows;
+	}
+	catch (err) {
+		console.log("Error getting leaderboard");
+		console.log(err);
+		return [];
+	}
+}
+
 // The user_id check makes these no-ops on content the user doesn't own.
 // Returns true only if a row owned by the user was changed.
 async function toggleActive(contentType, contentId, userId) {
@@ -246,6 +386,9 @@ module.exports = {
 	getContent,
 	getUserContent,
 	recordHit,
+	recordExternalHit,
+	getLeaderboard,
+	MAX_SCORED_URL_LENGTH,
 	toggleActive,
 	deleteContent
 };

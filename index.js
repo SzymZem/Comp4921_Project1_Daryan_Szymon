@@ -15,6 +15,7 @@ const db_users = require('./database/users');
 const db_content = require('./database/content');
 const { uploadImage, deleteImage, imageUrl } = require('./cloudinaryConnection');
 const success = db_utils.printMySQLVersion();
+require('./database/create_tables').migrateLinkTable();
 
 const port = process.env.PORT || 3000;
 
@@ -425,7 +426,8 @@ app.post('/content/create', (req, res) => {
             }
         }
 
-        const result = await db_content.createContent(req.session.user_id, type, data, form.customCode);
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const result = await db_content.createContent(req.session.user_id, type, data, form.customCode, baseUrl);
         if (!result.success) {
             if (type === 'image') {
                 await deleteImage(data); // don't leave an orphaned file on Cloudinary
@@ -685,6 +687,15 @@ app.post('/group/:id/read', async (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/leaderboard', async (req, res) => {
+    const entries = await db_content.getLeaderboard();
+    res.render('leaderboard', {
+        entries: entries,
+        baseUrl: req.protocol + '://' + req.get('host'),
+        maxUrlLength: db_content.MAX_SCORED_URL_LENGTH
+    });
+});
+
 app.use(express.static(__dirname + "/public"));
 
 // Short links live at the root, so this must stay after every other route and
@@ -704,6 +715,9 @@ app.get('/:code', async (req, res, next) => {
     await db_content.recordHit(content.content_type, content.content_id);
 
     if (content.content_type === 'link') {
+        if (req.session.user_id !== content.user_id) {
+            await db_content.recordExternalHit(content.content_id);
+        }
         // 302 (not 301) so browsers don't cache the redirect and skip our hit counter
         res.redirect(302, content.data);
     }

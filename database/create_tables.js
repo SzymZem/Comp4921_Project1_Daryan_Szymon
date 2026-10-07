@@ -106,6 +106,10 @@ async function createTables() {
             last_hit_datetime DATETIME,
             hits INT NOT NULL DEFAULT 0,
             active TINYINT(1) NOT NULL DEFAULT 1,
+            is_custom TINYINT(1) NOT NULL DEFAULT 0,
+            scored_url TEXT,
+            chars_saved INT NOT NULL DEFAULT 0,
+            external_hits INT NOT NULL DEFAULT 0,
             PRIMARY KEY (link_id),
             CONSTRAINT fk_link_user
                 FOREIGN KEY (user_id) REFERENCES user(user_id)
@@ -202,4 +206,36 @@ async function createTables() {
 }
 
 
-module.exports = { createTables };
+// Adds the leaderboard columns to an existing link table without dropping data.
+// MySQL 8.0 has no ADD COLUMN IF NOT EXISTS, so check information_schema first.
+const LINK_LEADERBOARD_COLUMNS = {
+    is_custom: 'TINYINT(1) NOT NULL DEFAULT 0',
+    scored_url: 'TEXT',
+    chars_saved: 'INT NOT NULL DEFAULT 0',
+    external_hits: 'INT NOT NULL DEFAULT 0'
+};
+
+async function migrateLinkTable() {
+    try {
+        const [rows] = await database.query(`
+            SELECT COLUMN_NAME FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'link';
+        `);
+        if (rows.length === 0) {
+            return; // table doesn't exist yet; createTables will make it with these columns
+        }
+        const existing = new Set(rows.map(r => r.COLUMN_NAME));
+        for (const [name, definition] of Object.entries(LINK_LEADERBOARD_COLUMNS)) {
+            if (!existing.has(name)) {
+                await database.query(`ALTER TABLE link ADD COLUMN ${name} ${definition};`);
+                console.log("Added column link." + name);
+            }
+        }
+    }
+    catch (err) {
+        console.log("Error migrating link table");
+        console.log(err);
+    }
+}
+
+module.exports = { createTables, migrateLinkTable };

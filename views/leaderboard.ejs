@@ -1,0 +1,43 @@
+<%- include("templates/header") %>
+<div class="content">
+    <h1 class="header">LEADERBOARD</h1>
+    <p>Ranked by the most characters saved by a single short link.</p>
+
+    <div class="box">
+        <p><b>RULES</b></p>
+        <ol>
+            <li>No custom short URLs. Only randomly generated codes count.</li>
+            <li>The link must be active.</li>
+            <li>Someone other than you must have clicked it at least once.</li>
+            <li>The same destination URL only counts once per user.</li>
+            <li>Padding is stripped before scoring: #fragments, tracking params (utm_*, fbclid, ...), empty params and trailing slashes. URLs over <%= maxUrlLength %> characters don't count.</li>
+            <li>No URL-lengthener sites, other shorteners, links back to this site, or generated gibberish (huge domain names, long runs of repeated characters, giant path segments).</li>
+        </ol>
+    </div>
+
+    <hr class="spacing">
+
+    <% if (entries.length === 0) { %>
+        <p>CIVIL PROTECTION NOTICE:<br><b>NO QUALIFYING LINKS YET.</b></p>
+    <% } else { %>
+        <table class="table is-fullwidth is-hoverable">
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Characters Saved</th>
+                <th>Short URL</th>
+                <th>Original URL</th>
+            </tr>
+            <% entries.forEach((entry, i) => { %>
+                <tr>
+                    <td><%= i + 1 %></td>
+                    <td><%= entry.username %></td>
+                    <td><b><%= entry.chars_saved %></b></td>
+                    <td><a href="/<%= entry.link_id %>" target="_blank"><%= baseUrl %>/<%= entry.link_id %></a></td>
+                    <td><%= entry.link_to.length > 80 ? entry.link_to.slice(0, 80) + '...' : entry.link_to %></td>
+                </tr>
+            <% }) %>
+        </table>
+    <% } %>
+</div>
+<%- include("templates/footer") %>

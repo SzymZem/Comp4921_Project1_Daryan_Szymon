@@ -1,7 +1,7 @@
 <%
     const navLinks = loggedIn
-        ? [{ href: "/", label: "HOME" }, { href: "/members", label: "MEMBERS" }, { href: "/logout", label: "SIGN OUT" }]
-        : [{ href: "/", label: "HOME" }, { href: "/login", label: "LOG IN" }, { href: "/signup", label: "SIGN UP" }];
+        ? [{ href: "/", label: "HOME" }, { href: "/members", label: "MEMBERS" }, { href: "/leaderboard", label: "LEADERBOARD" }, { href: "/logout", label: "SIGN OUT" }]
+        : [{ href: "/", label: "HOME" }, { href: "/leaderboard", label: "LEADERBOARD" }, { href: "/login", label: "LOG IN" }, { href: "/signup", label: "SIGN UP" }];
     const linkClass = (href) => currentPath === href ? "link-highlighted" : "";
 %>
 <!DOCTYPE html>
