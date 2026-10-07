@@ -1,3 +1,30 @@
-<%- include("templates/header") %> 
-    Page not found - 404
-<%- include("templates/footer") %> 
+<%- include("templates/header") %>
+    <section class="landing">
+        <p class="landing-kicker combine-red">// ANTI-CIVIL ACTIVITY DETECTED //</p>
+        <h1 class="landing-title">404 - SECTOR NOT FOUND</h1>
+        <p class="landing-greeting">You have strayed outside your assigned sector, citizen.</p>
+
+        <div class="landing-panel">
+            <p>
+                The location <span class="highlight"><%= currentPath %></span> does not exist, or has been
+                removed by order of the Citadel.
+            </p>
+            <p>
+                Verify the address you were issued, then return to an authorized area.
+            </p>
+        </div>
+
+        <p class="landing-signoff">
+            Failure to comply will result in permanent off-world relocation.
+        </p>
+
+        <div class="landing-actions">
+            <a href="/"><button class="button" type="button">RETURN TO CITY 17</button></a>
+            <% if (loggedIn) { %>
+                <a href="/dashboard"><button class="button" type="button">OPEN YOUR LINKS</button></a>
+            <% } else { %>
+                <a href="/login"><button class="button" type="button">LOG IN</button></a>
+            <% } %>
+        </div>
+    </section>
+<%- include("templates/footer") %>
