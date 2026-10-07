@@ -428,6 +428,18 @@ textarea {
     box-sizing: border-box;
 }
 
+/* :user-invalid only matches once the user has tried to submit (or edited the
+   field), so the required field isn't red on page load */
+.create-form :required:user-invalid,
+.create-form :required:user-invalid:hover {
+    border-color: var(--combine-red);
+    color: var(--combine-red);
+}
+
+.create-form .field:has(:required:user-invalid) .label {
+    color: var(--combine-red);
+}
+
 input[type="text"]:hover,
 input[type="password"]:hover,
 input[type="file"]:hover,
