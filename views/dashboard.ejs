@@ -99,7 +99,13 @@
                             <td><div class="qr-wrap"><img class="qr-code" src="<%= item.qr %>" alt="QR code for <%= baseUrl %>/<%= item.content_id %>"></div></td>
                             <td>
                                 <% if (type === 'link') { %>
-                                    <a href="<%= item.data %>" target="_blank" rel="noopener noreferrer"><%= item.data %></a>
+                                    <div class="long-value">
+                                        <a class="long-value-text" href="<%= item.data %>" target="_blank" rel="noopener noreferrer"><%= item.data %></a>
+                                        <% if (item.data.length > 50) { %>
+                                            <button class="button is-small long-value-toggle" type="button" onclick="toggleLongValue(this)"
+                                                aria-expanded="false" title="Show full URL">&#9662;</button>
+                                        <% } %>
+                                    </div>
                                 <% } else if (type === 'image') { %>
                                     <img src="<%= imageUrl(item.data, { width: 120, height: 80, crop: 'fill' }) %>" alt="thumbnail">
                                 <% } else { %>
@@ -137,6 +143,12 @@
             <img src="https://media1.tenor.com/m/mVZ8kHeWAdgAAAAd/are-you-still-tdere-hello.gif">
             <% } %>
                 <script>
+                    function toggleLongValue(button) {
+                        const expanded = button.parentElement.classList.toggle('is-expanded');
+                        button.setAttribute('aria-expanded', expanded);
+                        button.title = expanded ? 'Collapse URL' : 'Show full URL';
+                    }
+
                     function copyShortUrl(button) {
                         navigator.clipboard.writeText(button.dataset.copy).then(() => {
                             button.textContent = 'Copied!';
