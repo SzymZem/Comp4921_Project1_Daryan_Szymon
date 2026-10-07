@@ -1,29 +1,54 @@
-<%- include("templates/header") %> 
-    <% if (loggedIn) { %>
+<%- include("templates/header") %>
+    <section class="landing">
+        <p class="landing-kicker combine-red">// BROADCAST FROM THE CITADEL //</p>
+        <h1 class="landing-title">CIVIL PROTECTION MEDIA</h1>
+        <p class="landing-greeting">
+            <% if (loggedIn) { %>
+                Greetings, citizen <span class="highlight"><%= username %></span>.
+            <% } else { %>
+                Hello, citizens of City 17, and welcome to Civil Protection Media.
+            <% } %>
+        </p>
 
-        <span>Hello, <%= username %></span>
-        <br>
-        <a href="/members">
-            <input  class="button"type="button" value="Go to Members Area" />
-        </a>
-        
-        <br>
-        
-        <a href="/logout">
-            <input  class="button"type="button" value="Sign Out" />
-        </a>
+        <div class="landing-panel">
+            <p>
+                I thought so much of City 17 that I elected to establish our website here, in the
+                Citadel so thoughtfully provided by our Benefactors.
+            </p>
+            <p>
+                <span class="highlight">Civil Protection Media</span> (or <span class="highlight">CPM</span>)
+                is a link shortening service built to help you, fellow citizens, shorten your
+                website to your desire.
+            </p>
+        </div>
 
-    <% } else { %>
+        <div class="landing-features">
+            <div class="landing-feature">
+                <h2>SHORTEN</h2>
+                <p>Links, images and text, condensed into a short URL. Use a random code or choose your own.</p>
+            </div>
+            <div class="landing-feature">
+                <h2>COMPETE</h2>
+                <p>
+                    To assist Civil Protection in guarding against anti-civil violations, and to foster a
+                    competitive spirit among citizens, we have established a Leaderboard.
+                    <a href="/leaderboard">Review the qualifications</a> to have your name placed upon it.
+                </p>
+            </div>
+        </div>
 
-        <!-- <a href="/signup">
-            <input  class="button"type="button" value="Sign up" />
-        </a>
-        
-        <br>
-        
-        <a href="/login">
-            <input  class="button"type="button" value="Log In" />
-        </a> -->
+        <p class="landing-signoff">
+            I would like to thank you, and our Benefactors, for making this service possible.
+        </p>
 
-    <% } %>
-<%- include("templates/footer") %> 
+        <div class="landing-actions">
+            <% if (loggedIn) { %>
+                <a href="/members"><button class="button" type="button">OPEN YOUR LINKS</button></a>
+                <a href="/leaderboard"><button class="button" type="button">VIEW LEADERBOARD</button></a>
+            <% } else { %>
+                <a href="/signup"><button class="button" type="button">REGISTER AS CITIZEN</button></a>
+                <a href="/login"><button class="button" type="button">LOG IN</button></a>
+            <% } %>
+        </div>
+    </section>
+<%- include("templates/footer") %>
