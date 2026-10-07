@@ -1,12 +1,33 @@
 <%- include("templates/header") %>
-    <div style="display: flex; flex-direction: column; align-items: center; padding-top: 6vh;">
-        <h1 class="heading combine-font" id="login-heading">LOG IN</h1>
-        <form action='/loggingin' method='post' style="display: flex; flex-direction: column; align-items: center;">
-            <input class="input" name='username' type='text' placeholder='username'>
-            <input class="input" name='password' type='password' placeholder='password'>
-            <button class="button">SUBMIT</button>
+    <section class="landing auth">
+        <p class="landing-kicker combine-red">// CIVIL PROTECTION CHECKPOINT //</p>
+        <h1 class="landing-title" id="login-heading">LOG IN</h1>
+        <p class="landing-greeting">Present your identification, citizen.</p>
+
+        <form class="landing-panel auth-form" action='/loggingin' method='post'>
+            <div class="auth-field">
+                <label class="auth-label" for="login-username">CITIZEN ID</label>
+                <input class="input" id="login-username" name='username' type='text' placeholder='username'
+                    autocomplete="username" required autofocus>
+            </div>
+            <div class="auth-field">
+                <label class="auth-label" for="login-password">PASSCODE</label>
+                <input class="input" id="login-password" name='password' type='password' placeholder='password'
+                    autocomplete="current-password" required>
+            </div>
+
+            <% if (loginFailed) { %>
+                <p class="auth-error">ACCESS DENIED. CREDENTIALS NOT RECOGNIZED.</p>
+            <% } %>
+
+            <button class="button" type="submit">REQUEST ACCESS</button>
         </form>
-    </div>
+
+        <div class="auth-switch">
+            <p>Not yet registered with Civil Protection?</p>
+            <a href="/signup" data-text="REGISTER AS CITIZEN">REGISTER AS CITIZEN</a>
+        </div>
+    </section>
 
     <% if (loginFailed) { %>
         <script>

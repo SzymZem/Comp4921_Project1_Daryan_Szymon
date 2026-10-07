@@ -561,3 +561,70 @@ h3 {
     justify-content: center;
     gap: 1rem;
 }
+
+.auth {
+    width: min(92vw, max(36vw, 60vh));
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-label {
+    font-family: "combine-readable";
+    color: var(--heading-color);
+    letter-spacing: 0.15em;
+}
+
+.auth-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1vh 1vw;
+    font-size: 1em;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+    background-color: #25B6CE30;
+}
+
+.auth-form input:user-invalid,
+.auth-form input:user-invalid:hover {
+    border-color: var(--combine-red);
+    color: var(--combine-red);
+}
+
+.auth-field:has(input:user-invalid) .auth-label,
+.auth-error {
+    color: var(--combine-red);
+}
+
+.auth-error {
+    font-family: "combine-readable";
+    letter-spacing: 0.1em;
+}
+
+.auth-form button {
+    justify-content: center;
+    padding: 1.5vh 2vw;
+}
+
+.auth-switch {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+}
+
+.auth-switch a {
+    padding: 1vh 1vw;
+}

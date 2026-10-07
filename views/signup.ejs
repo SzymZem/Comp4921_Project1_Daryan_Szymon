@@ -1,18 +1,43 @@
 <%- include("templates/header") %>
-    create user
+    <section class="landing auth">
+        <p class="landing-kicker combine-red">// CITIZEN REGISTRATION //</p>
+        <h1 class="landing-title">SIGN UP</h1>
+        <p class="landing-greeting">Welcome. Welcome to City 17. You have chosen, or been chosen, to register.</p>
 
-    <form action='/submitUser' method='post'>
-        <input class="input" name='username' type='text' placeholder='username' value="<%= username ?? '' %>">
-        <br>
-        <input class="input" name='password' type='password' placeholder='password'
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{10,}$"
-            title="At least 10 characters, including uppercase, lowercase, number, and symbol" required> <br>
-        <button class="button">Submit</button>
-    </form>
+        <form class="landing-panel auth-form" action='/submitUser' method='post'>
+            <div class="auth-field">
+                <label class="auth-label" for="signup-username">CITIZEN ID</label>
+                <input class="input" id="signup-username" name='username' type='text' placeholder='username'
+                    value="<%= username ?? '' %>" autocomplete="username" required autofocus>
+            </div>
+            <div class="auth-field">
+                <label class="auth-label" for="signup-password">PASSCODE</label>
+                <input class="input" id="signup-password" name='password' type='password' placeholder='password'
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{10,}$"
+                    title="At least 10 characters, including uppercase, lowercase, number, and symbol"
+                    autocomplete="new-password" required>
+            </div>
 
-    <% if (typeof error !=="undefined" ) { %>
-        <p style="color:red;">
-            <%= error %>
-        </p>
-        <% } %>
-            <%- include("templates/footer") %>
+            <% if (typeof error !== "undefined" && error) { %>
+                <p class="auth-error"><%= error %></p>
+            <% } %>
+
+            <button class="button" type="submit">SUBMIT REGISTRATION</button>
+        </form>
+
+        <div class="landing-feature">
+            <h2>PASSCODE DIRECTIVE</h2>
+            <p>
+                A compliant passcode is at least <span class="highlight">10 characters</span> and contains an
+                <span class="highlight">uppercase</span> letter, a <span class="highlight">lowercase</span> letter,
+                a <span class="highlight">number</span> and a <span class="highlight">symbol</span>.
+                Non-compliant passcodes will be rejected.
+            </p>
+        </div>
+
+        <div class="auth-switch">
+            <p>Already registered?</p>
+            <a href="/login" data-text="LOG IN">LOG IN</a>
+        </div>
+    </section>
+<%- include("templates/footer") %>
