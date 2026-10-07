@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const database = require('../databaseConnection');
+const database = require('../config/databaseConnection');
 
 const CODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const CODE_LENGTH = 6;
@@ -20,9 +20,10 @@ const CONTENT_TABLES = {
 // Short codes live at the site root (e.g. /abc123), so they can't collide with
 // our own single-segment routes. Express routing is case-insensitive, so compare lowercase.
 const RESERVED_CODES = new Set([
-	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'login',
+	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'dashboard', 'login',
 	'submituser', 'loggingin', 'logout', 'loggedin', 'api', 'creategroup', 'group',
-	'message', 'links', 'content', 'emojis', 'leaderboard'
+	'message', 'links', 'content', 'emojis', 'leaderboard',
+	'css', 'js', 'fonts', 'images'
 ]);
 
 // --- Leaderboard scoring ---

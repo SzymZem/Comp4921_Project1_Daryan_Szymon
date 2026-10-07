@@ -1,6 +1,6 @@
 <%
     const navLinks = loggedIn
-        ? [{ href: "/", label: "HOME" }, { href: "/members", label: "MEMBERS" }, { href: "/leaderboard", label: "LEADERBOARD" }, { href: "/logout", label: "SIGN OUT" }]
+        ? [{ href: "/", label: "HOME" }, { href: "/dashboard", label: "DASHBOARD" }, { href: "/leaderboard", label: "LEADERBOARD" }, { href: "/logout", label: "SIGN OUT" }]
         : [{ href: "/", label: "HOME" }, { href: "/leaderboard", label: "LEADERBOARD" }, { href: "/login", label: "LOG IN" }, { href: "/signup", label: "SIGN UP" }];
     const linkClass = (href) => currentPath === href ? "link-highlighted" : "";
 %>
@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap">
 
     <!--Style sheets-->
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/animations.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
 
     <!--Javascript-->
-    <script src="/combine.js"></script>
+    <script src="/js/combine.js"></script>
     <% if (typeof scripts !== "undefined") { %>
         <% scripts.forEach(src => { %>
             <script src="<%= src %>"></script>
