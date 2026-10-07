@@ -1,0 +1,397 @@
+* {
+    transition: opacity var(--ani-time), visibility var(--ani-time);
+    font-family: "Orbitron", sans-serif;
+    /* The default font for the entire page, loaded from Google Fonts in header.ejs */
+    color: var(--text-color);
+    fill: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.nav-links a,
+.sidebar a {
+    white-space: nowrap;
+}
+
+.nav-links {
+    display: contents;
+}
+
+nav {
+    z-index: 9999;
+    border-bottom: 2px solid var(--border-color);
+}
+
+nav ul {
+    width: 100%;
+    list-style: none;
+    display: flex;
+}
+
+.nav-logo {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 749 / 242;
+}
+
+.logo {
+    margin-left: 0.5vw !important;
+    margin-right: auto;
+}
+
+.nav-links {
+    margin-left: auto !important;
+}
+
+nav li {
+    height: var(--nav-height);
+}
+
+a, button {
+    font-family: "combine-readable";
+    height: 100%;
+    padding: 0 2vw;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    isolation: isolate;
+}
+
+button[title="Click to enable"], button:hover[title="Click to enable"] {
+    border-color: var(--combine-red);
+    color: var(--combine-red);
+
+    background-color: var(--combine-red);
+
+}
+
+button[title="Click to enable"]::before, button:hover[title="Click to enable"]::before {
+
+
+    background: url("/combine/combine-screen-red.gif");
+}
+
+
+u {
+    font-family: "Combine";
+    text-decoration: none;
+}
+
+table, td, th {
+    border: 2px solid var(--border-color);
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/* The hover gif sits on its own layer so its opacity can fade both ways;
+   a background-image swap to none can't be transitioned and just pops out */
+a::before, button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url("/combine/combine-screen.gif");
+    background-repeat: no-repeat;
+    background-size: 10%; /* Must be a percentage, not the default auto, or the size can't animate to/from 1000% */
+    opacity: 0;
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
+}
+
+a:hover, button:hover {
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
+    color: var(--heading-color);
+    animation: glitch-text 2.5s steps(1) infinite;
+}
+
+/* Copy of the label, cut into horizontal slices that jump sideways */
+a::after, button::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    padding: inherit;
+    display: flex;
+    align-items: center;
+    font-family: inherit;
+    color: var(--highlight-color);
+    opacity: 0;
+    pointer-events: none;
+}
+
+a:hover::after, button:hover::after {
+    opacity: 0.8;
+    animation: glitch-slice 9s steps(10) infinite;
+}
+
+/* Size and position change only on hover so they animate in, and back out on unhover */
+a:hover::before, button:hover::before {
+    opacity: 1;
+    background-size: 1000%;
+    /* 10x the link's width, height follows the gif's aspect ratio */
+    background-position: center;
+    animation: glitch-bg 8s steps(1) infinite;
+}
+
+/* Glitching is a lot of flashing, so calm it down for people who ask for less motion */
+/* The logo is an SVG, so text-shadow and data-text don't apply to it.
+   The split copies come from drop-shadow filters on the SVG instead,
+   and the torn slices from a copy of CMB.svg used as a mask */
+nav .logo a:hover {
+    animation: none;
+}
+
+nav .logo a:hover .nav-logo {
+    animation: glitch-svg 1.2s steps(1) infinite;
+}
+
+nav .logo a::after {
+    content: "";
+    background-color: var(--highlight-color);
+    -webkit-mask: url("/combine/CMB.svg") center / contain no-repeat;
+    mask: url("/combine/CMB.svg") center / contain no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    a:hover,
+    a:hover::before,
+    a:hover::after,
+    nav .logo a:hover .nav-logo {
+        animation: none;
+    }
+}
+
+a:not(:hover) {
+    transition: all calc(var(--ani-time) / 2) ease-in-out;
+}
+
+
+.link-highlighted {
+    color: var(--heading-color);
+}
+
+.hamburger {
+    margin-left: auto;
+}
+
+.sidebar {
+    transition: all var(--ani-time) ease-out;
+    border: 2px solid var(--border-color);
+    position: fixed;
+    right: 0;
+    width: 50vw;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.sidebar li a {
+    padding-left: 1vw;
+}
+
+.lower-nav {
+    height: var(--lower-nav-height);
+    border-top: 2px solid var(--border-color);
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    list-style: none;
+
+}
+
+.page-id {
+    margin-left: 0.5vw;
+    font-size: 100%;
+}
+
+.cmb-main {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 1;
+    margin-left: auto;
+}
+
+/* Media query */
+/* TODO: Replace the hard coded max-width with a better approcach, Because it is not going to work with too much text in the navbar */
+@media screen and (max-width: 1069px) {
+    nav {
+        width: 100vw;
+        position: fixed;
+    }
+}
+
+
+
+
+
+
+
+/* ----- presets ----- */
+
+:root {
+    --border-color: #20666B;
+    --text-color: #1882A1;
+    --ani-time: 0.25s;
+    --heading-color: #3BC2B7;
+    --combine-red: #E53523;
+    --background-color: #072734;
+    --highlight-color: #3ED2E1; /* Bright blue used for hovers and the glitch effect */
+    /* Shown until the background gif has loaded */
+    --nav-height: 6vh;
+    /* Top navbar height, the page content is padded around it */
+    --lower-nav-height: 6vh;
+    /* Bottom bar height */
+}
+
+@font-face {
+    font-family: 'Combine';
+    src: url('/combine/Combine_Alphabet.otf');
+}
+
+@font-face {
+    font-family: "BoxedRSB";
+    src: url('/combine/BoxedRoundSemibold.ttf');
+}
+
+
+@font-face {
+    font-family: "combine-readable";
+    src: url('/combine/fs-terran.otf');
+}
+
+.BoxedRSB {
+    font-family: "BoxedRSB";
+}
+
+.combine-font {
+    font-family: "Combine";
+}
+
+.combine-readable {
+    font-family: "combine-readable";
+}
+
+.combine-red {
+    color: #E53523;
+}
+
+.mobile-only {
+    display: none;
+}
+
+.desktop-only {
+    display: block;
+}
+
+.fabricator-background {
+    background: var(--background-color) url("/combine/combine-screen.gif");
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    image-rendering: pixelated;
+    /* Scale the low-res gif up as sharp pixels instead of blurring it */
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    padding-top: 1vh;
+    padding-bottom: calc(var(--lower-nav-height) + 1vh);
+    /* Clears the fixed bottom bar */
+    font-size: 1em;
+    margin-left: 2vw;
+    margin-right: 2vw;
+}
+
+.dead-center {
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+button {
+    background-color: transparent;
+    transition: all var(--ani-time) ease-out;
+    border-radius: 0;
+    color: #3CAFB3;
+    border: 2px solid #3CAFB3;
+}
+
+button:hover {
+    background-image: none;
+    background-color: #25B6CE60;
+    color: #3ED2E1;
+    border: 2px solid #3ED2E1;
+
+}
+
+button:not(:hover) {
+    transition: background-color var(--ani-time) ease-out;
+    background-color: transparent;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"],
+textarea {
+    transition: all var(--ani-time) ease-out;
+    background-color: transparent;
+    border: 2px solid #3CAFB3;
+    padding: 0.5vh 0.5vw;
+    margin: 0.5vh 0;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="file"]:hover,
+textarea:hover {
+    border: 2px solid #3ED2E1;
+}
+
+/* @media screen and (max-width: 1069px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .content {
+        padding-top: calc(var(--nav-height) + 1vh);
+        /* Clears the fixed navbar */
+    }
+} */
+
+h1 {
+    color: var(--heading-color);
+}
+
+h2 {
+    color: var(--heading-color);
+}
+
+h3 {
+    color: var(--heading-color);
+}
+
+/* White-on-transparent barcode used as a mask so it takes the Combine blue */
+.barcode {
+    height: 60%;
+    aspect-ratio: 1604 / 590;
+    margin-left: 0.5vw;
+    background-color: var(--text-color);
+    -webkit-mask: url("/combine/barcode.png") center / contain no-repeat;
+    mask: url("/combine/barcode.png") center / contain no-repeat;
+}

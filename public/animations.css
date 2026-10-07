@@ -1,0 +1,75 @@
+/* Fade states toggled by combine.js. The transition itself lives on the * rule in style.css */
+
+.fade {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.fadeIn {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Per-character underline for the page load intro, removed one by one by combine.js.
+   The * rule in style.css sets font and colour on every element, so the spans
+   would override their parent's look without the inherits */
+.intro-underline {
+    font-family: "Combine" !important;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.intro-char {
+    font-family: inherit;
+    color: inherit;
+    fill: inherit;
+}
+
+/* ----- Glitch effects for the nav link hover (used in style.css) ----- */
+
+/* The zoomed gif jumps around and flashes brighter/darker in choppy steps.
+   No hue-rotate: it would shift the gif away from the Combine blues */
+@keyframes glitch-bg {
+    0%   { background-position: center; filter: none; }
+    15%  { background-position: 42% 55%; filter: brightness(1.1) saturate(1.2); }
+    22%  { background-position: center; filter: none; }
+    48%  { background-position: 60% 38%; filter: contrast(1.1); }
+    55%  { background-position: 50% 50%; filter: none; }
+    80%  { background-position: 35% 70%; filter: contrast(1.1) brightness(0.9); }
+    86%  { background-position: center; filter: none; }
+}
+
+/* Dark and light blue copies of the letters split off to either side and flicker */
+@keyframes glitch-text {
+    0%   { text-shadow: 0.08em 0 var(--text-color), -0.08em 0 var(--highlight-color); transform: none; }
+    10%  { text-shadow: -0.15em 0 var(--text-color), 0.12em 0 var(--highlight-color); transform: translateX(0.05em); }
+    20%  { text-shadow: 0.04em 0 var(--text-color), -0.04em 0 var(--highlight-color); transform: none; }
+    45%  { text-shadow: 0.2em 0.03em var(--text-color), -0.2em -0.03em var(--highlight-color); transform: translateX(-0.08em) skewX(-8deg); }
+    50%  { text-shadow: 0.06em 0 var(--text-color), -0.06em 0 var(--highlight-color); transform: none; }
+    75%  { text-shadow: -0.1em 0 var(--text-color), 0.1em 0 var(--highlight-color); transform: translateY(-0.05em); }
+    80%  { text-shadow: 0.08em 0 var(--text-color), -0.08em 0 var(--highlight-color); transform: none; }
+}
+
+/* same as glitch-text bnut for the svg */
+@keyframes glitch-svg {
+    0%   { filter: drop-shadow(0.08em 0 var(--text-color)) drop-shadow(-0.08em 0 var(--highlight-color)); transform: none; }
+    10%  { filter: drop-shadow(-0.15em 0 var(--text-color)) drop-shadow(0.12em 0 var(--highlight-color)); transform: translateX(0.05em); }
+    20%  { filter: drop-shadow(0.04em 0 var(--text-color)) drop-shadow(-0.04em 0 var(--highlight-color)); transform: none; }
+    45%  { filter: drop-shadow(0.2em 0.03em var(--text-color)) drop-shadow(-0.2em -0.03em var(--highlight-color)); transform: translateX(-0.08em) skewX(-8deg); }
+    50%  { filter: drop-shadow(0.06em 0 var(--text-color)) drop-shadow(-0.06em 0 var(--highlight-color)); transform: none; }
+    75%  { filter: drop-shadow(-0.1em 0 var(--text-color)) drop-shadow(0.1em 0 var(--highlight-color)); transform: translateY(-0.05em); }
+    80%  { filter: drop-shadow(0.08em 0 var(--text-color)) drop-shadow(-0.08em 0 var(--highlight-color)); transform: none; }
+}
+
+/* Only one thin band of the light blue copy shows at a time, shoved sideways.
+   Bands stay in the middle 35-65% of the link, where the letters are */
+@keyframes glitch-slice {
+    0%   { clip-path: inset(40% 0 52% 0); transform: translateX(-0.3em); }
+    12%  { clip-path: inset(55% 0 36% 0); transform: translateX(0.4em); }
+    25%  { clip-path: inset(0 0 100% 0);  transform: none; }
+    40%  { clip-path: inset(46% 0 46% 0); transform: translateX(0.2em); }
+    52%  { clip-path: inset(0 0 100% 0);  transform: none; }
+    68%  { clip-path: inset(36% 0 56% 0); transform: translateX(-0.5em); }
+    78%  { clip-path: inset(50% 0 40% 0); transform: translateX(0.15em); }
+    90%  { clip-path: inset(0 0 100% 0);  transform: none; }
+}
