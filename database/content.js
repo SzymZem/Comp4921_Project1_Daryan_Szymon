@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const database = require('../databaseConnection');
+const database = require('../config/databaseConnection');
 
 const CODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const CODE_LENGTH = 6;
@@ -22,7 +22,8 @@ const CONTENT_TABLES = {
 const RESERVED_CODES = new Set([
 	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'dashboard', 'login',
 	'submituser', 'loggingin', 'logout', 'loggedin', 'api', 'creategroup', 'group',
-	'message', 'links', 'content', 'emojis', 'leaderboard'
+	'message', 'links', 'content', 'emojis', 'leaderboard',
+	'css', 'js', 'fonts', 'images'
 ]);
 
 // --- Leaderboard scoring ---

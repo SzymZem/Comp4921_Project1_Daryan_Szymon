@@ -1,4 +1,4 @@
-const database = require('../databaseConnection');
+const database = require('../config/databaseConnection');
 
 async function createTables() {
 

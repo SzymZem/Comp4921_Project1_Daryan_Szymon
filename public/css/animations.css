@@ -18,7 +18,7 @@
     animation: glitch-text .00001s steps(1) infinite;
     animation: glitch-slice .001s steps(1000) infinite;
 
-    background: url("/combine/combine-screen.gif");
+    background: url("/images/combine-screen.gif");
     background-repeat: no-repeat;
     background-size: 1000%;
 }
@@ -31,7 +31,7 @@
 }
 
 .intro-cell {
-    background: var(--background-color) url("/combine/combine-screen.gif") no-repeat;
+    background: var(--background-color) url("/images/combine-screen.gif") no-repeat;
     background-size: 1000%;
     animation: glitch-bg 1s steps(1) infinite;
 }

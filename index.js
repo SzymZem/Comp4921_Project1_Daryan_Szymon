@@ -1,5 +1,3 @@
-require('./utils');
-
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -10,11 +8,11 @@ const QRCode = require('qrcode');
 const saltRounds = 12;
 
 
-const database = require('./databaseConnection');
+const database = require('./config/databaseConnection');
 const db_utils = require('./database/db_utils');
 const db_users = require('./database/users');
 const db_content = require('./database/content');
-const { uploadImage, deleteImage, imageUrl } = require('./cloudinaryConnection');
+const { uploadImage, deleteImage, imageUrl } = require('./config/cloudinaryConnection');
 const success = db_utils.printMySQLVersion();
 require('./database/create_tables').migrateLinkTable();
 
