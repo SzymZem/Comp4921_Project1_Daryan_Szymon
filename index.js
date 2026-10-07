@@ -123,7 +123,7 @@ function contentTypeOrDefault(type) {
     return db_content.CONTENT_TYPES.includes(type) ? type : 'link';
 }
 
-async function renderMembers(req, res, type, error, form) {
+async function renderDashboard(req, res, type, error, form) {
     const groups = await db_users.getUserGroups(req.session.user_id);
     const contents = await db_content.getUserContent(req.session.user_id, type);
     const baseUrl = req.protocol + '://' + req.get('host');
@@ -137,7 +137,7 @@ async function renderMembers(req, res, type, error, form) {
         item.qr = 'data:image/svg+xml,' + encodeURIComponent(svg);
     }
 
-    res.render('members', {
+    res.render('dashboard', {
         loggedIn: true,
         username: req.session.username,
         groups: groups,
@@ -151,14 +151,19 @@ async function renderMembers(req, res, type, error, form) {
     });
 }
 
-app.get('/members', async (req, res) => {
+// Old address of the dashboard, kept so existing links still work
+app.get('/members', (req, res) => {
+    res.redirect(req.query.type ? '/dashboard?type=' + contentTypeOrDefault(req.query.type) : '/dashboard');
+});
+
+app.get('/dashboard', async (req, res) => {
 
     if (!req.session.authenticated) {
         res.redirect('/');
         return
     }
 
-    await renderMembers(req, res, contentTypeOrDefault(req.query.type));
+    await renderDashboard(req, res, contentTypeOrDefault(req.query.type));
 });
 
 
@@ -187,7 +192,7 @@ app.post('/submitUser', async (req, res) => {
             req.session.cookie.maxAge = expireTime;
 
             req.session.save(() => {
-                res.redirect('/members');
+                res.redirect('/dashboard');
             });
         }
         else {
@@ -232,7 +237,7 @@ app.post('/loggingin', async (req, res) => {
                 req.session.cookie.maxAge = expireTime;
 
                 req.session.save(() => {
-                    res.redirect('/members');
+                    res.redirect('/dashboard');
                 });
 
                 return;
@@ -393,7 +398,7 @@ app.post('/content/create', (req, res) => {
 
         const fail = async (message) => {
             res.status(400);
-            await renderMembers(req, res, type, message, form);
+            await renderDashboard(req, res, type, message, form);
         };
 
         if (uploadErr) {
@@ -447,7 +452,7 @@ app.post('/content/create', (req, res) => {
             return;
         }
 
-        res.redirect('/members?type=' + type);
+        res.redirect('/dashboard?type=' + type);
     });
 });
 
@@ -458,7 +463,7 @@ app.post('/content/:id/toggle', async (req, res) => {
         res.status(400).render("errorMessage", { error: "You can only edit your own content." });
         return;
     }
-    res.redirect('/members?type=' + content.content_type);
+    res.redirect('/dashboard?type=' + content.content_type);
 });
 
 app.post('/content/:id/delete', async (req, res) => {
@@ -472,7 +477,7 @@ app.post('/content/:id/delete', async (req, res) => {
     if (content.content_type === 'image') {
         await deleteImage(content.data);
     }
-    res.redirect('/members?type=' + content.content_type);
+    res.redirect('/dashboard?type=' + content.content_type);
 });
 
 app.get('/createGroup', async (req, res) => {
@@ -502,7 +507,7 @@ app.post('/createGroup', async (req, res) => {
         await db_users.addUserToGroup(userId, roomId);
     }
 
-    res.redirect('/members');
+    res.redirect('/dashboard');
 });
 
 app.get('/group/:id', async (req, res) => {

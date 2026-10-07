@@ -20,7 +20,7 @@ const CONTENT_TABLES = {
 // Short codes live at the site root (e.g. /abc123), so they can't collide with
 // our own single-segment routes. Express routing is case-insensitive, so compare lowercase.
 const RESERVED_CODES = new Set([
-	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'login',
+	'about', 'contact', 'submitemail', 'createtables', 'signup', 'members', 'dashboard', 'login',
 	'submituser', 'loggingin', 'logout', 'loggedin', 'api', 'creategroup', 'group',
 	'message', 'links', 'content', 'emojis', 'leaderboard'
 ]);
